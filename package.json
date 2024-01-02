@@ -1,0 +1,42 @@
+{
+  "name": "hackfest",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/server.js",
+  "scripts": {
+    "build": "npx tsc",
+    "lint": "eslint ./src",
+    "start-prod": "node ./build/server.js",
+    "start-dev": "nodemon ./src/server.ts"
+  },
+  "keywords": [],
+  "author": "Circlo Team",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/storage": "^7.7.0",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "firebase": "^10.7.1",
+    "firebase-admin": "^12.0.0",
+    "joi": "^17.11.0",
+    "moment": "^2.30.1",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.6.5",
+    "nanoid": "^3.3.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.11",
+    "@types/node": "^20.10.5",
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "eslint": "^8.56.0",
+    "eslint-config-standard-with-typescript": "^43.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-n": "^16.5.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "nodemon": "^3.0.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
