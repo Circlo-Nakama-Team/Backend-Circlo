@@ -53,4 +53,12 @@ export default class CommunityHandler {
       throw error
     }
   }
+
+  async addPostLikeHandler (idPost: string): Promise<void> {
+    await this._service.addPostLike(idPost)
+  }
+
+  async decPostLikeHandler (idPost: string): Promise<void> {
+    await this._service.decPostLike(idPost)
+  }
 }

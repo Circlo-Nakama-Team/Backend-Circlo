@@ -1,4 +1,4 @@
-import type { MapDBModelUserType } from '../../types/UserTypes'
+import type { MapDBModelUserType, MapDBModelUserAddressType } from '../../types/UserTypes'
 const mapDBToModel = ({
   USERID,
   FIRSTNAME,
@@ -16,4 +16,16 @@ const mapDBToModel = ({
   point: POINT,
   address: ADDRESS
 })
-export default mapDBToModel
+
+const mapDBToModelUserAddress = ({
+  ADDRESSID,
+  USERID,
+  ADDRESS,
+  DETAIL_ADDRESS
+}: MapDBModelUserAddressType): any => ({
+  addressId: ADDRESSID,
+  userId: USERID,
+  address: ADDRESS,
+  detailAddress: DETAIL_ADDRESS
+})
+export { mapDBToModel, mapDBToModelUserAddress }

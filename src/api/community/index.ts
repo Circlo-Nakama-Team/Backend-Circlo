@@ -1,4 +1,4 @@
-import express, { type Request, type Response } from 'express'
+import express, { type Request, type Response, type NextFunction } from 'express'
 import admin from '../../config/FirebaseAdmin'
 import multer from 'multer'
 import app from '../../config/FirebaseConfig'
@@ -18,7 +18,7 @@ const communityServices = new CommunityServices()
 const handler = new CommunityHandler(communityServices, CommunityValidator)
 const auth = getAuth(app)
 
-router.get('/', async (req: Request, res: Response): Promise<any> => {
+router.get('/', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     const posts = await handler.getPostsHandler()
     res.status(200).json({
@@ -28,15 +28,12 @@ router.get('/', async (req: Request, res: Response): Promise<any> => {
         posts
       }
     })
-  } catch (error: any) {
-    res.status(error.statusCode | 500).json({
-      status: 'Failed',
-      message: error
-    })
+  } catch (error) {
+    next(error)
   }
 })
 
-router.post('/', upload.single('image'), async (req: Request, res: Response): Promise<any> => {
+router.post('/post', upload.single('image'), async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     if (req.file) req.body.image = req.file
     const credential: string | undefined = req.headers.authorization
@@ -47,11 +44,34 @@ router.post('/', upload.single('image'), async (req: Request, res: Response): Pr
       status: 'Success',
       message: 'Success Add Post'
     })
-  } catch (error: any) {
-    res.status(error.statusCode | 500).json({
-      status: 'Failed',
-      message: error
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.put('/post/:id/likes/add', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const { id: idPost } = req.params
+    await handler.addPostLikeHandler(idPost)
+    res.status(200).json({
+      status: 'Success',
+      message: 'Success Add Like Post'
     })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.put('/post/:id/likes/dec', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const { id: idPost } = req.params
+    await handler.decPostLikeHandler(idPost)
+    res.status(200).json({
+      status: 'Success',
+      message: 'Success Unlike Post'
+    })
+  } catch (error) {
+    next(error)
   }
 })
 

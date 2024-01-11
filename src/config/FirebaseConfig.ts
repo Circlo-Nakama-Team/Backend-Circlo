@@ -1,16 +1,17 @@
 import { initializeApp } from 'firebase/app'
-// import { getAnalytics } from 'firebase/analytics'
+import dotenv from 'dotenv'
+
+dotenv.config({ path: '.env' })
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyBSu97UygnugtgqMzslpC8xoLSXFsXl6dQ',
-  authDomain: 'circlo-635bd.firebaseapp.com',
-  projectId: 'circlo-635bd',
-  storageBucket: 'circlo-635bd.appspot.com',
-  messagingSenderId: '444097994810',
-  appId: '1:444097994810:web:30b6ecda0b1ca72e311503',
-  measurementId: 'G-1TZC0DFLZP'
+  apiKey: process.env.API_KEY,
+  authDomain: process.env.AUTH_DOMAIN,
+  projectId: process.env.PROJECT_ID,
+  storageBucket: process.env.STORAGE_BUCKET,
+  messagingSenderId: process.env.MESSAGING_SENDER_ID,
+  appId: process.env.APP_ID,
+  measurementId: process.env.MEASUREMENT_ID
 }
 
 const app = initializeApp(firebaseConfig)
-// const analytics = getAnalytics(app)
 export default app

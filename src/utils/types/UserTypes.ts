@@ -29,3 +29,10 @@ export interface MapDBModelUserType {
   POINT: number
   ADDRESS: string
 }
+
+export interface MapDBModelUserAddressType {
+  ADDRESSID: string
+  USERID: string
+  ADDRESS: string
+  DETAIL_ADDRESS: string
+}

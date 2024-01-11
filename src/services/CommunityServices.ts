@@ -1,6 +1,6 @@
 import db from '../config/DBConfig'
 import { type UserPostType } from '../utils/types/CommunityTypes'
-import admin from 'firebase-admin'
+import mapDBToModel from '../utils/mapping/community'
 import dotenv from 'dotenv'
 import UploadServices from './UploadServices'
 
@@ -16,12 +16,26 @@ export default class CommunityServices {
 
   async getPosts (): Promise<any> {
     try {
-      const query = 'SELECT * FROM post'
+      const query = `SELECT * FROM post
+      ORDER BY POST_TIME DESC`
       const [queryResult] = await this._pool.execute(query)
       console.log(queryResult)
       return queryResult
     } catch (error) {
       console.error(error)
+      throw error
+    }
+  }
+
+  async getPostHistory (id: string): Promise<any> {
+    try {
+      const postQuery = 'SELECT * FROM post WHERE USERID = ?'
+      const values = [id]
+      const [postResult] = await this._pool.execute(postQuery, values)
+      const post = postResult.map(mapDBToModel)
+      return post
+    } catch (error: any) {
+      console.log(error)
       throw error
     }
   }
@@ -32,6 +46,28 @@ export default class CommunityServices {
     data.postImage ? values.push(data.postImage) : values.push('')
 
     try {
+      await this._pool.execute(query, values)
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  }
+
+  async addPostLike (idPost: string): Promise<void> {
+    try {
+      const query = 'UPDATE post SET POST_LIKES = POST_LIKES + 1 WHERE POST_ID = ?'
+      const values = [idPost]
+      await this._pool.execute(query, values)
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  }
+
+  async decPostLike (idPost: string): Promise<void> {
+    try {
+      const query = 'UPDATE post SET POST_LIKES = POST_LIKES - 1 WHERE POST_ID = ?'
+      const values = [idPost]
       await this._pool.execute(query, values)
     } catch (error) {
       console.error(error)

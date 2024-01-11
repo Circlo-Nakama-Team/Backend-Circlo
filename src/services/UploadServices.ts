@@ -1,5 +1,4 @@
 import db from '../config/DBConfig'
-import admin from 'firebase-admin'
 import gc from '../config/StorageConfig'
 
 const bucket = gc.bucket('circlo-bucket')
@@ -25,6 +24,17 @@ export default class UploadServices {
       const file = bucket.file(`Post/${filename}`)
       await file.save(buffer)
       return file.name
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  async uploadPredictImage (filename: string, buffer: any): Promise<any> {
+    try {
+      const file = bucket.file(`Predict/${filename}`)
+      await file.save(buffer)
+      return { filename: file.name, file }
     } catch (error) {
       console.log(error)
       throw error

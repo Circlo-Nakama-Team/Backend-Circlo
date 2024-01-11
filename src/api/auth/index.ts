@@ -1,8 +1,9 @@
-import express, { type Request, type Response } from 'express'
+import express, { type Request, type Response, type NextFunction } from 'express'
 import multer from 'multer'
 import dotenv from 'dotenv'
 import { nanoid } from 'nanoid'
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
+import { getAuth, signInWithEmailAndPassword, sendEmailVerification, createUserWithEmailAndPassword } from 'firebase/auth'
+import { sendEmailVerificationLink } from '../../services/EmailServices'
 
 import UserServices from '../../services/UserServices'
 import admin from '../../config/FirebaseAdmin'
@@ -10,13 +11,21 @@ import app from '../../config/FirebaseConfig'
 import UsersValidator from '../../validator/user'
 import { type PostUserType, type CreateUserRequestBodyType, type LoginBodyType } from '../../utils/types/UserTypes'
 
+import AuthenticationServices from '../../services/AuthenticationServices'
+import AuthenticationError from '../../exceptions/AuthenticationError'
+
 dotenv.config({ path: '.env' })
 const router = express.Router()
 const upload = multer()
 const userServices = new UserServices()
 const auth = getAuth(app)
 
-router.post('/register', async (req: Request, res: Response): Promise<any> => {
+const actionCodeSettings = {
+  url: 'http://localhost:5000/auth/verifyemail', // Set the URL where the user will be directed after clicking the email verification link
+  handleCodeInApp: true
+}
+
+router.post('/register', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     UsersValidator.validateUserRegisterPayload(req.body)
     const { firstname, lastname, username, email, password }: CreateUserRequestBodyType = req.body
@@ -29,40 +38,58 @@ router.post('/register', async (req: Request, res: Response): Promise<any> => {
       email,
       point: 0
     }
-
     await userServices.addUser(userData)
-
-    const userRecord = await admin.auth().createUser({
+    // const userRecord = await createUserWithEmailAndPassword(auth, email, password)
+    // console.log(userRecord.user)
+    // await sendEmailVerification(userRecord.user)
+    const userRecord: any = await admin.auth().createUser({
       uid: id,
       displayName: username,
       email,
       password,
       photoURL: `${process.env.GS_URL}/User/profil.jpg`,
-      emailVerified: true,
       disabled: false
     })
+    // const userRecord: any = await admin.auth().createUser({
+    //   uid: id,
+    //   displayName: username,
+    //   email,
+    //   password,
+    //   photoURL: `${process.env.GS_URL}/User/profil.jpg`,
+    //   disabled: true
+    // }).then(async (userRecord: any): Promise<any> => {
+    //   await admin.auth().generateEmailVerificationLink(userRecord.email, actionCodeSettings).then(async (link): Promise<any> => {
+    //     console.log(link)
+    //     await sendEmailVerificationLink(userRecord.email, userRecord.displayName, link)
+    //   })
+    // })
+
     res.status(201).send({
       status: 'Success',
-      message: 'User Created',
+      message: 'Success Add User',
       data: {
-        id: userRecord.uid
+        userId: userRecord.uid
       }
     })
+    // res.status(201).send({
+    //   status: 'Success',
+    //   message: 'Please verify your email, The link has been sent to your email'
+    // })
   } catch (error: any) {
     console.log(error)
-    res.status(error.statusCode | 500).send({
-      status: 'Failed',
-      message: error
-    })
+    next(error)
   }
 })
 
-router.post('/login', async (req: Request, res: Response) => {
+router.post('/login', async (req: Request, res: Response, next: NextFunction) => {
   try {
+    UsersValidator.validateUserLoginPayload(req.body)
     const user: LoginBodyType = {
       email: req.body.email,
       password: req.body.password
     }
+    // const isEmailVerified = await admin.auth().getUserByEmail(user.email)
+    // console.log(isEmailVerified)
     const signInResponse = await signInWithEmailAndPassword(auth, user.email, user.password)
     const credential = await signInResponse.user.getIdToken(true)
     const refreshToken = signInResponse.user.refreshToken
@@ -75,7 +102,27 @@ router.post('/login', async (req: Request, res: Response) => {
       }
     })
   } catch (error: any) {
-    res.status(error.statusCode | 500).send({ error: error.message })
+    console.log(error)
+    next(error)
+  }
+})
+
+router.post('/logout', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const token: string | undefined = req.headers.authorization
+    if (!token) throw new AuthenticationError('Request Missing Auth Header')
+
+    const decodedToken = await AuthenticationServices(token)
+    const { uid: userId } = decodedToken
+
+    try {
+      await admin.auth().revokeRefreshTokens(userId)
+      res.status(200).json({ status: 'success', message: 'Logout Berhasil' })
+    } catch (error) {
+      next(error)
+    }
+  } catch (error) {
+    next(error)
   }
 })
 

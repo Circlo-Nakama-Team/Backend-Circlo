@@ -3,7 +3,9 @@ import { type PostUserType } from '../utils/types/UserTypes'
 import admin from 'firebase-admin'
 import dotenv from 'dotenv'
 import UploadServices from './UploadServices'
-
+import { nanoid } from 'nanoid'
+import NotFoundError from '../exceptions/NotFoundError'
+import { mapDBToModelUserAddress } from '../utils/mapping/users'
 const uploadServices = new UploadServices()
 dotenv.config({ path: '.env' })
 export default class UserServices {
@@ -16,7 +18,7 @@ export default class UserServices {
 
   async addUser (data: PostUserType): Promise<string | any> {
     const query = 'INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)'
-    const values = [data.id, data.firstname, data.lastname, data.username, data.email, data.point, '']
+    const values = [data.id, data.firstname, data.lastname, data.username, data.email, data.point, null]
 
     try {
       const result = await this._pool.execute(query, values)
@@ -29,10 +31,10 @@ export default class UserServices {
 
   async getUserById (id: string): Promise <any> {
     try {
-      const query = 'SELECT FIRSTNAME,LASTNAME,POINT,ADDRESS FROM user WHERE USERID = ?'
+      const userQuery = 'SELECT FIRSTNAME,LASTNAME,POINT,MAIN_ADDRESSID FROM user WHERE USERID = ?'
       const values = [id]
 
-      const [queryResult] = await this._pool.execute(query, values)
+      const [queryResult] = await this._pool.execute(userQuery, values)
       const userRecord = await admin.auth().getUser(id)
 
       const userData = {
@@ -43,7 +45,7 @@ export default class UserServices {
         email: userRecord.email,
         image: userRecord.photoURL,
         point: queryResult[0].POINT,
-        address: queryResult[0].ADDRESS
+        main_addressId: queryResult[0].MAIN_ADDRESSID
       }
       return userData
     } catch (error) {
@@ -64,9 +66,9 @@ export default class UserServices {
           displayName: payload.username
         })
       }
-      if (payload.address) {
-        queryProperty.push('ADDRESS = ?')
-        queryValues.push(payload.address)
+      if (payload.addressId) {
+        queryProperty.push('MAIN_ADDRESSID = ?')
+        queryValues.push(payload.addressId)
       }
       if (payload.image) {
         const filename = await this._uploadServices.uploadUserImage(payload.image.originalname, payload.image.buffer)
@@ -84,6 +86,76 @@ export default class UserServices {
       return queryResult[0]
     } catch (error) {
       console.error(error)
+      throw error
+    }
+  }
+
+  async addAddressUser (idUser: string, payload: any): Promise<string | any> {
+    try {
+      const id = `address-${nanoid(10)}`
+      const query = 'INSERT INTO address VALUES (?, ?, ?, ?)'
+      const values = [id, idUser, payload.address, payload.detail_address]
+
+      await this._pool.execute(query, values)
+
+      const addressId = await this.verifiedAddressExist(id)
+      return addressId
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  async verifiedAddressExist (idAddress: string): Promise <string | any> {
+    try {
+      const query = 'SELECT ADDRESSID,USERID FROM address WHERE ADDRESSID = ?'
+      const values = [idAddress]
+      const [queryResult] = await this._pool.execute(query, values)
+      return {
+        userId: queryResult[0].USERID,
+        addressId: queryResult[0].ADDRESSID
+      }
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  async getUserAddressByUserId (userId: string): Promise <any> {
+    try {
+      const query = 'SELECT * FROM address WHERE USERID = ?'
+      const values = [userId]
+      const [queryResult] = await this._pool.execute(query, values)
+      const formattedQueryResult = queryResult.map(mapDBToModelUserAddress)
+      return formattedQueryResult
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  async getCertainUserAddress (id: string, addressId: any): Promise<any> {
+    try {
+      const query = 'SELECT * FROM address WHERE USERID = ? AND ADDRESSID = ?'
+      const values = [id, addressId]
+
+      const [queryResult] = await this._pool.execute(query, values)
+      const formattedQueryResult = queryResult.map(mapDBToModelUserAddress)
+      console.log(queryResult)
+      return formattedQueryResult
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  async deleteAddressUser (userId: string, addressId: string): Promise<void> {
+    try {
+      const query = 'DELETE FROM address WHERE USERID = ? AND ADDRESSID = ?'
+      const values = [userId, addressId]
+      await this._pool.execute(query, values)
+    } catch (error) {
+      console.log(error)
       throw error
     }
   }
