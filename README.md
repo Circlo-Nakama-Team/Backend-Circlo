@@ -21,3 +21,4 @@ Collection Link: https://drive.google.com/file/d/149Zy6B-p53msX4SDQG2JBSEzsodnIh
 
 ## Notes
 * Task Sequence 2 adalah getTrashIdeas seperti yang ada di API DOCS
+* ML Server Link: https://ml-hackfest-dot-circlo-635bd.et.r.appspot.com
