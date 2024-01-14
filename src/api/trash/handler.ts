@@ -20,6 +20,16 @@ export default class TrashHandler {
     }
   }
 
+  async getTrashCategories (): Promise<any> {
+    try {
+      const trashData = await this._service.getTrashCategoriesList()
+      return trashData
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
   async getTrashIdeas (image: any): Promise<any> {
     try {
       const { originalname, buffer } = image

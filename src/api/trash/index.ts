@@ -7,13 +7,10 @@ import TrashServices from '../../services/TrashServices'
 
 import UploadServices from '../../services/UploadServices'
 
-import CommunityServices from '../../services/CommunityServices'
-
 dotenv.config({ path: '.env' })
 const router = express.Router()
 const trashServices = new TrashServices()
 const uploadServices = new UploadServices()
-const communityServices = new CommunityServices()
 const handler = new TrashHandler(trashServices, uploadServices)
 
 const upload = multer()
@@ -26,6 +23,21 @@ router.get('/', async (req: Request, res: Response, next: NextFunction): Promise
       message: 'Success Get Trash',
       data: {
         trashData
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get('/categories', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const trashCategories = await handler.getTrashCategories()
+    res.status(200).json({
+      status: 'Success',
+      message: 'Success Get Trash',
+      data: {
+        trashCategories
       }
     })
   } catch (error) {

@@ -1,7 +1,6 @@
 import db from '../config/DBConfig'
 import dotenv from 'dotenv'
-import { nanoid } from 'nanoid'
-import { mapDBToModelUserDonate } from '../utils/mapping/donate'
+import { mapDBModelTrashCategories } from '../utils/mapping/trash'
 import NotFoundError from '../exceptions/NotFoundError'
 dotenv.config({ path: '.env' })
 export default class DonateServices {
@@ -16,6 +15,18 @@ export default class DonateServices {
         INNER JOIN categories ON trash.CATEGORIESID = categories.CATEGORIESID`
       const [result] = await this._pool.execute(query)
       return result
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  async getTrashCategoriesList (): Promise<any> {
+    try {
+      const query = 'SELECT * FROM categories'
+      const [result] = await this._pool.execute(query)
+      const formattedResult = await result.map(mapDBModelTrashCategories)
+      return formattedResult
     } catch (error) {
       console.log(error)
       throw error

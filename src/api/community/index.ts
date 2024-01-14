@@ -1,8 +1,5 @@
 import express, { type Request, type Response, type NextFunction } from 'express'
-import admin from '../../config/FirebaseAdmin'
 import multer from 'multer'
-import app from '../../config/FirebaseConfig'
-import { getAuth } from 'firebase/auth'
 import dotenv from 'dotenv'
 
 import CommunityHandler from './handler'
@@ -16,7 +13,6 @@ const router = express.Router()
 const upload = multer()
 const communityServices = new CommunityServices()
 const handler = new CommunityHandler(communityServices, CommunityValidator)
-const auth = getAuth(app)
 
 router.get('/', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
