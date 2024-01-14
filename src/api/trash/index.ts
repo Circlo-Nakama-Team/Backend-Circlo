@@ -7,6 +7,8 @@ import TrashServices from '../../services/TrashServices'
 
 import UploadServices from '../../services/UploadServices'
 
+import AuthenticationError from '../../exceptions/AuthenticationError'
+
 dotenv.config({ path: '.env' })
 const router = express.Router()
 const trashServices = new TrashServices()
@@ -48,7 +50,11 @@ router.get('/categories', async (req: Request, res: Response, next: NextFunction
 router.get('/ideas', upload.single('image'), async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     const image = req.file
-    const trashIdeas = await handler.getTrashIdeas(image)
+
+    const credential: string | undefined = req.headers.authorization
+    if (!credential) throw new AuthenticationError('Authorization Header Required')
+
+    const trashIdeas = await handler.getTrashIdeas(credential, image)
     res.status(200).json({
       status: 'Success',
       message: 'Success Get Trash Ideas',

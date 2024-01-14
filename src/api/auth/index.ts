@@ -9,7 +9,7 @@ import UserServices from '../../services/UserServices'
 import admin from '../../config/FirebaseAdmin'
 import app from '../../config/FirebaseConfig'
 import UsersValidator from '../../validator/user'
-import { type PostUserType, type CreateUserRequestBodyType, type LoginBodyType } from '../../utils/types/UserTypes'
+import { type PostUserType, type CreateUserRequestBodyType, type LoginBodyType, type CreateUserGoogleRequestBodyType } from '../../utils/types/UserTypes'
 
 import AuthenticationServices from '../../services/AuthenticationServices'
 import AuthenticationError from '../../exceptions/AuthenticationError'
@@ -38,7 +38,6 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
       email,
       point: 0
     }
-    await userServices.addUser(userData)
     // const userRecord = await createUserWithEmailAndPassword(auth, email, password)
     // console.log(userRecord.user)
     // await sendEmailVerification(userRecord.user)
@@ -50,6 +49,7 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
       photoURL: `${process.env.GS_URL}/User/profil.jpg`,
       disabled: false
     })
+    await userServices.addUser(userData)
     // const userRecord: any = await admin.auth().createUser({
     //   uid: id,
     //   displayName: username,
@@ -76,6 +76,32 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
     //   message: 'Please verify your email, The link has been sent to your email'
     // })
   } catch (error: any) {
+    console.log(error)
+    next(error)
+  }
+})
+
+router.post('/register-google', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    UsersValidator.validateUserRegisterGooglePayload(req.body)
+    const userData: PostUserType = {
+      id: req.body.userId,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname || null,
+      username: req.body.username,
+      email: req.body.email,
+      point: 0
+    }
+    await userServices.addUser(userData)
+
+    res.status(201).send({
+      status: 'Success',
+      message: 'Success Add User',
+      data: {
+        userId: req.body.userId
+      }
+    })
+  } catch (error) {
     console.log(error)
     next(error)
   }

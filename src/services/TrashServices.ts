@@ -55,11 +55,15 @@ export default class DonateServices {
       const [result] = await this._pool.execute(query, values)
 
       if (result.length !== 0) {
-        const queryLink = 'SELECT LINK AS tutorialLink, SOURCE AS linkSource FROM tutorial WHERE IDEASID = ?'
+        const queryLink = 'SELECT TITLE AS title, LINK AS tutorialLink, SOURCE AS linkSource, CREATOR AS creator FROM tutorial WHERE IDEASID = ?'
+        const queryBenefits = 'SELECT DESCRIPTION AS description FROM ideas_benefit WHERE IDEASID = ?'
         await Promise.all(result.map(async (trash: any): Promise<any> => {
-          const linkValues = [trash.ideasId]
-          const [Linkresult] = await this._pool.execute(queryLink, linkValues)
-          trash.link = Linkresult
+          const linkAndBenefitsValues = [trash.ideasId]
+          const [linkResult] = await this._pool.execute(queryLink, linkAndBenefitsValues)
+          const [benefitsResult] = await this._pool.execute(queryBenefits, linkAndBenefitsValues)
+          const formattedBenefitList = await benefitsResult.map((benefit: any) => benefit.description)
+          trash.link = linkResult
+          trash.benefits = formattedBenefitList
         }))
       }
       return result

@@ -2,6 +2,8 @@ import axios from 'axios'
 import { Readable } from 'stream'
 import FormData from 'form-data'
 
+import authorize from '../../services/AuthorizationServices'
+
 export default class TrashHandler {
   _service: any
   _uploadServices: any
@@ -30,8 +32,10 @@ export default class TrashHandler {
     }
   }
 
-  async getTrashIdeas (image: any): Promise<any> {
+  async getTrashIdeas (credential: string, image: any): Promise<any> {
     try {
+      await authorize(credential)
+
       const { originalname, buffer } = image
       const { filename, file: filePredict } = await this._uploadServices.uploadPredictImage(originalname, buffer)
       const signedUrl = await filePredict.getSignedUrl({
@@ -81,7 +85,6 @@ export default class TrashHandler {
           ideas
         }
       }))
-      // console.log(formattedArray)
       return formattedArray
     } catch (error) {
       console.log(error)

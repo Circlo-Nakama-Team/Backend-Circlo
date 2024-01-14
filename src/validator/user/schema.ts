@@ -2,10 +2,17 @@ import Joi from 'joi'
 
 const UserRegisterPayloadSchema = Joi.object({
   firstname: Joi.string().required(),
-  lastname: Joi.string().required(),
+  lastname: Joi.string(),
   username: Joi.string().required(),
-  email: Joi.string().required(),
+  email: Joi.string().email().required(),
   password: Joi.string().required()
+})
+const UserRegisterGooglePayloadSchema = Joi.object({
+  userId: Joi.string().required(),
+  firstname: Joi.string().required(),
+  lastname: Joi.string(),
+  username: Joi.string().required(),
+  email: Joi.string().email().required()
 })
 const UserLoginPayloadSchema = Joi.object({
   email: Joi.string().email().required(),
@@ -22,4 +29,4 @@ const UserAddressPayloadSchema = Joi.object({
   detail_address: Joi.string().required()
 })
 
-export { UserRegisterPayloadSchema, UserUpdatePayloadSchema, UserLoginPayloadSchema, UserAddressPayloadSchema }
+export { UserRegisterPayloadSchema, UserUpdatePayloadSchema, UserLoginPayloadSchema, UserAddressPayloadSchema, UserRegisterGooglePayloadSchema }

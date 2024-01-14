@@ -17,12 +17,11 @@ export default class UserServices {
   }
 
   async addUser (data: PostUserType): Promise<string | any> {
-    const query = 'INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)'
-    const values = [data.id, data.firstname, data.lastname, data.username, data.email, data.point, null]
-
     try {
-      const result = await this._pool.execute(query, values)
-      return result
+      const query = 'INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)'
+      const values = [data.id, data.firstname, data.lastname, data.username, data.email, data.point, null]
+
+      await this._pool.execute(query, values)
     } catch (error) {
       console.error(error)
       throw error
@@ -73,7 +72,6 @@ export default class UserServices {
       if (payload.image) {
         const filename = await this._uploadServices.uploadUserImage(payload.image.originalname, payload.image.buffer)
         await admin.auth().updateUser(id, {
-          displayName: payload.username,
           photoURL: `${process.env.GS_URL}/${filename}`
         })
       }

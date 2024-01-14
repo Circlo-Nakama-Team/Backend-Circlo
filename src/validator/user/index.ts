@@ -1,9 +1,15 @@
 import InvariantError from '../../exceptions/InvariantError'
-import { UserRegisterPayloadSchema, UserUpdatePayloadSchema, UserLoginPayloadSchema, UserAddressPayloadSchema } from './schema'
+import { UserRegisterPayloadSchema, UserUpdatePayloadSchema, UserLoginPayloadSchema, UserAddressPayloadSchema, UserRegisterGooglePayloadSchema } from './schema'
 
 const UsersValidator = {
   validateUserRegisterPayload: (payload: any): void => {
     const validationResult = UserRegisterPayloadSchema.validate(payload)
+    if (validationResult.error) {
+      throw new InvariantError(validationResult.error.message)
+    }
+  },
+  validateUserRegisterGooglePayload: (payload: any): void => {
+    const validationResult = UserRegisterGooglePayloadSchema.validate(payload)
     if (validationResult.error) {
       throw new InvariantError(validationResult.error.message)
     }
