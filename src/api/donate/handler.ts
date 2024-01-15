@@ -25,11 +25,13 @@ export default class DonateHandler {
       this._validator.validateDonatePayload(payload)
       const donateId = await this._service.addDonate(id, payload)
       await Promise.all(image.map(async (image: any): Promise<void> => {
-        const imageId = `${donateId}_${nanoid(10)}`
+        const imageId = `trashImage_${nanoid(10)}`
         const filename = `${imageId}_${image.originalname}`
 
         const file = await this._uploadService.uploadDonateImage(filename, image.buffer)
-        const link = `${process.env.GS_URL}/${file}`
+        const encodedFilename = file.replace(/ /g, '%20')
+
+        const link = `${process.env.GS_URL}/${encodedFilename}`
         console.log(link)
         this._service.addDonateImage(donateId, imageId, link)
         return

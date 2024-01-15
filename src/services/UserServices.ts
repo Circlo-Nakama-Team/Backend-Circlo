@@ -71,8 +71,9 @@ export default class UserServices {
       }
       if (payload.image) {
         const filename = await this._uploadServices.uploadUserImage(payload.image.originalname, payload.image.buffer)
+        const encodedFilename = filename.replace(/ /g, '%20')
         await admin.auth().updateUser(id, {
-          photoURL: `${process.env.GS_URL}/${filename}`
+          photoURL: `${process.env.GS_URL}/${encodedFilename}`
         })
       }
 

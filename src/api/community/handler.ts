@@ -44,7 +44,8 @@ export default class CommunityHandler {
 
       if (image !== null) {
         const imageFilename = await this._uploadService.uploadPostImage(image.originalname, image.buffer)
-        payload.postImage = `${process.env.GS_URL}/${imageFilename}`
+        const encodedFilename = imageFilename.replace(/ /g, '%20')
+        payload.postImage = `${process.env.GS_URL}/${encodedFilename}`
       }
 
       await this._service.addPost(userId, payload)

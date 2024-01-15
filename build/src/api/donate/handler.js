@@ -34,10 +34,11 @@ class DonateHandler {
                 this._validator.validateDonatePayload(payload);
                 const donateId = yield this._service.addDonate(id, payload);
                 yield Promise.all(image.map((image) => __awaiter(this, void 0, void 0, function* () {
-                    const imageId = `${donateId}_${(0, nanoid_1.nanoid)(10)}`;
+                    const imageId = `trashImage_${(0, nanoid_1.nanoid)(10)}`;
                     const filename = `${imageId}_${image.originalname}`;
                     const file = yield this._uploadService.uploadDonateImage(filename, image.buffer);
-                    const link = `${process.env.GS_URL}/${file}`;
+                    const encodedFilename = file.replace(/ /g, '%20');
+                    const link = `${process.env.GS_URL}/${encodedFilename}`;
                     console.log(link);
                     this._service.addDonateImage(donateId, imageId, link);
                     return;

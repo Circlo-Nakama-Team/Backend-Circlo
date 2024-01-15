@@ -81,8 +81,9 @@ class UserServices {
                 }
                 if (payload.image) {
                     const filename = yield this._uploadServices.uploadUserImage(payload.image.originalname, payload.image.buffer);
+                    const encodedFilename = filename.replace(/ /g, '%20');
                     yield firebase_admin_1.default.auth().updateUser(id, {
-                        photoURL: `${process.env.GS_URL}/${filename}`
+                        photoURL: `${process.env.GS_URL}/${encodedFilename}`
                     });
                 }
                 const queryPropertyString = queryProperty.join(', ');

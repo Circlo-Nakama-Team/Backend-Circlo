@@ -87,6 +87,7 @@ router.put('/profile', upload.single('image'), (req, res, next) => __awaiter(voi
         });
     }
     catch (error) {
+        console.log(error);
         next(error);
     }
 }));

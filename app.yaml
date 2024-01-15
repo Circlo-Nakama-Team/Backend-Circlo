@@ -1,0 +1,3 @@
+runtime: nodejs18
+entrypoint: node ./build/src/server.js
+service: backend-circlo
