@@ -21,8 +21,12 @@ const userServices = new UserServices()
 const auth = getAuth(app)
 
 const actionCodeSettings = {
-  url: 'http://localhost:5000/auth/verifyemail', // Set the URL where the user will be directed after clicking the email verification link
-  handleCodeInApp: true
+  url: 'http://localhost:5000' // Set the URL where the user will be directed after clicking the email verification link
+  // android: {
+  //   packageName: 'com.nakama.circlo',
+  //   installApp: true,
+  //   minimumVersion: '12'
+  // },
 }
 
 router.post('/register', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
@@ -49,8 +53,7 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
       photoURL: `${process.env.GS_URL}/User/profil.jpg`,
       disabled: false
     })
-    await userServices.addUser(userData)
-    // const userRecord: any = await admin.auth().createUser({
+    // await admin.auth().createUser({
     //   uid: id,
     //   displayName: username,
     //   email,
@@ -58,11 +61,13 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
     //   photoURL: `${process.env.GS_URL}/User/profil.jpg`,
     //   disabled: true
     // }).then(async (userRecord: any): Promise<any> => {
+    //   console.log(userRecord)
     //   await admin.auth().generateEmailVerificationLink(userRecord.email, actionCodeSettings).then(async (link): Promise<any> => {
     //     console.log(link)
     //     await sendEmailVerificationLink(userRecord.email, userRecord.displayName, link)
     //   })
     // })
+    await userServices.addUser(userData)
 
     res.status(201).send({
       status: 'Success',

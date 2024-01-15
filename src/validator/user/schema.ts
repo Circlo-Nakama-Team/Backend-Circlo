@@ -21,7 +21,7 @@ const UserLoginPayloadSchema = Joi.object({
 const UserUpdatePayloadSchema = Joi.object({
   username: Joi.string(),
   addressId: Joi.string(),
-  image: Joi.string().valid('image/apng', 'image/avif', 'image/gif', 'image/jpeg', 'image/png', 'image/svg+xml', 'image/webp')
+  image: Joi.string().valid('image/apng', 'image/avif', 'image/jpeg', 'image/png', 'image/svg+xml', 'image/webp')
 })
 
 const UserAddressPayloadSchema = Joi.object({
