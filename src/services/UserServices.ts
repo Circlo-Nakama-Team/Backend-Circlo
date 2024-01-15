@@ -92,8 +92,8 @@ export default class UserServices {
   async addAddressUser (idUser: string, payload: any): Promise<string | any> {
     try {
       const id = `address-${nanoid(10)}`
-      const query = 'INSERT INTO address VALUES (?, ?, ?, ?)'
-      const values = [id, idUser, payload.address, payload.detail_address]
+      const query = 'INSERT INTO address VALUES (?, ?, ?, ?, ?)'
+      const values = [id, idUser, payload.address, payload.detail_address, payload.addressTitle]
 
       await this._pool.execute(query, values)
 

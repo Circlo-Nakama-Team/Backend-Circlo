@@ -21,11 +21,13 @@ const mapDBToModelUserAddress = ({
   ADDRESSID,
   USERID,
   ADDRESS,
-  DETAIL_ADDRESS
+  DETAIL_ADDRESS,
+  TITLE
 }: MapDBModelUserAddressType): any => ({
   addressId: ADDRESSID,
   userId: USERID,
   address: ADDRESS,
-  detailAddress: DETAIL_ADDRESS
+  detailAddress: DETAIL_ADDRESS,
+  title: TITLE
 })
 export { mapDBToModel, mapDBToModelUserAddress }

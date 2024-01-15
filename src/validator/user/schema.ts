@@ -26,7 +26,8 @@ const UserUpdatePayloadSchema = Joi.object({
 
 const UserAddressPayloadSchema = Joi.object({
   address: Joi.string().required(),
-  detail_address: Joi.string().required()
+  detail_address: Joi.string().required(),
+  addressTitle: Joi.string().required()
 })
 
 export { UserRegisterPayloadSchema, UserUpdatePayloadSchema, UserLoginPayloadSchema, UserAddressPayloadSchema, UserRegisterGooglePayloadSchema }

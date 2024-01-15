@@ -43,4 +43,5 @@ export interface MapDBModelUserAddressType {
   USERID: string
   ADDRESS: string
   DETAIL_ADDRESS: string
+  TITLE: string
 }

@@ -47,7 +47,7 @@ router.get('/categories', async (req: Request, res: Response, next: NextFunction
   }
 })
 
-router.get('/ideas', upload.single('image'), async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+router.post('/ideas', upload.single('image'), async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     const image = req.file
 

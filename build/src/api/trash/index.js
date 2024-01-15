@@ -55,7 +55,7 @@ router.get('/categories', (req, res, next) => __awaiter(void 0, void 0, void 0, 
         next(error);
     }
 }));
-router.get('/ideas', upload.single('image'), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.post('/ideas', upload.single('image'), (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const image = req.file;
         const credential = req.headers.authorization;

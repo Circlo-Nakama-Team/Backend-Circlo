@@ -102,8 +102,8 @@ class UserServices {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const id = `address-${(0, nanoid_1.nanoid)(10)}`;
-                const query = 'INSERT INTO address VALUES (?, ?, ?, ?)';
-                const values = [id, idUser, payload.address, payload.detail_address];
+                const query = 'INSERT INTO address VALUES (?, ?, ?, ?, ?)';
+                const values = [id, idUser, payload.address, payload.detail_address, payload.addressTitle];
                 yield this._pool.execute(query, values);
                 const addressId = yield this.verifiedAddressExist(id);
                 return addressId;

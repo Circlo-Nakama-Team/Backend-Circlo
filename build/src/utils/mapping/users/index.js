@@ -11,10 +11,11 @@ const mapDBToModel = ({ USERID, FIRSTNAME, LASTNAME, USERNAME, EMAIL, POINT, ADD
     address: ADDRESS
 });
 exports.mapDBToModel = mapDBToModel;
-const mapDBToModelUserAddress = ({ ADDRESSID, USERID, ADDRESS, DETAIL_ADDRESS }) => ({
+const mapDBToModelUserAddress = ({ ADDRESSID, USERID, ADDRESS, DETAIL_ADDRESS, TITLE }) => ({
     addressId: ADDRESSID,
     userId: USERID,
     address: ADDRESS,
-    detailAddress: DETAIL_ADDRESS
+    detailAddress: DETAIL_ADDRESS,
+    title: TITLE
 });
 exports.mapDBToModelUserAddress = mapDBToModelUserAddress;

@@ -34,6 +34,7 @@ const UserUpdatePayloadSchema = joi_1.default.object({
 exports.UserUpdatePayloadSchema = UserUpdatePayloadSchema;
 const UserAddressPayloadSchema = joi_1.default.object({
     address: joi_1.default.string().required(),
-    detail_address: joi_1.default.string().required()
+    detail_address: joi_1.default.string().required(),
+    addressTitle: joi_1.default.string().required()
 });
 exports.UserAddressPayloadSchema = UserAddressPayloadSchema;
