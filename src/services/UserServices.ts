@@ -105,6 +105,34 @@ export default class UserServices {
     }
   }
 
+  async updateAddressUser (id: string, addressId: string, payload: any): Promise<void> {
+    try {
+      const queryState = []
+      const queryValues = []
+      if (payload.address) {
+        queryState.push('ADDRESS = ?')
+        queryValues.push(payload.address)
+      }
+      if (payload.detail_address) {
+        queryState.push('DETAIL_ADDRESS = ?')
+        queryValues.push(payload.detail_address)
+      }
+      if (payload.addressTitle) {
+        queryState.push('TITLE = ?')
+        queryValues.push(payload.addressTitle)
+      }
+
+      const queryPropertyString: string = queryState.join(', ')
+      queryValues.push(id)
+      queryValues.push(addressId)
+      const query = `UPDATE address SET ${queryPropertyString} WHERE USERID = ? AND ADDRESSID = ?`
+      await this._pool.execute(query, queryValues)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
   async verifiedAddressExist (idAddress: string): Promise <string | any> {
     try {
       const query = 'SELECT ADDRESSID,USERID FROM address WHERE ADDRESSID = ?'

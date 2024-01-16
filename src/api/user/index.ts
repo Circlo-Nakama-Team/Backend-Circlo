@@ -119,6 +119,21 @@ router.get('/profile/address/:id', async (req: Request, res: Response, next: Nex
   }
 })
 
+router.put('/profile/address/:id', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const { id: addressId } = req.params
+    const credential: string | undefined = req.headers.authorization
+    if (!credential) throw new AuthenticationError('Authorization Header Required')
+    await handler.putAddressHandler(credential, addressId, req.body)
+    res.status(200).json({
+      status: 'Success',
+      message: 'Success Update User Address'
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
 router.delete('/profile/address/:addressId', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     const credential: string | undefined = req.headers.authorization

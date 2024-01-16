@@ -30,4 +30,9 @@ const UserAddressPayloadSchema = Joi.object({
   addressTitle: Joi.string().required()
 })
 
-export { UserRegisterPayloadSchema, UserUpdatePayloadSchema, UserLoginPayloadSchema, UserAddressPayloadSchema, UserRegisterGooglePayloadSchema }
+const UpdateUserAddressPayloadSchema = Joi.object({
+  address: Joi.string(),
+  detail_address: Joi.string(),
+  addressTitle: Joi.string()
+})
+export { UserRegisterPayloadSchema, UserUpdatePayloadSchema, UserLoginPayloadSchema, UserAddressPayloadSchema, UserRegisterGooglePayloadSchema, UpdateUserAddressPayloadSchema }

@@ -86,6 +86,18 @@ export default class UserHandler {
     }
   }
 
+  async putAddressHandler (credential: string, addressId: string, payload: any): Promise<void> {
+    try {
+      const decodedToken = await authorize(credential)
+      const { uid: id }: any = decodedToken
+      this._validator.validateUpdateUserAddressPayload(payload)
+      await this._service.updateAddressUser(id, addressId, payload)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
   async deleteAddressHandler (credential: string, addressId: string): Promise<void> {
     try {
       const decodedToken = await authorize(credential)
