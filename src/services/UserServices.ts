@@ -35,11 +35,11 @@ export default class UserServices {
 
       const [queryResult] = await this._pool.execute(userQuery, values)
       const userRecord = await admin.auth().getUser(id)
-
+      const lastname = queryResult[0].LASTNAME ? queryResult[0].LASTNAME : null
       const userData = {
         id: userRecord.uid,
         firstname: queryResult[0].FIRSTNAME,
-        lastname: queryResult[0].LASTNAME,
+        lastname,
         username: userRecord.displayName,
         email: userRecord.email,
         image: userRecord.photoURL,

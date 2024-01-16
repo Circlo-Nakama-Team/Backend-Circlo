@@ -15,8 +15,8 @@ dotenv.config({ path: '.env' })
 const app: Express = express()
 const port = 8080
 
-app.use(bodyParser.json())
 app.use(cors())
+app.use(bodyParser.json())
 
 const errorHandlingMiddleware = (err: Error, req: Request, res: Response, next: NextFunction): any => {
   if (err instanceof ClientError) {
@@ -28,7 +28,7 @@ const errorHandlingMiddleware = (err: Error, req: Request, res: Response, next: 
 
   res.status(500).json({
     status: 'Error',
-    message: 'Internal Server Error'
+    message: err.message
   })
 }
 // app.set('view engine', 'ejs')

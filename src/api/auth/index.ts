@@ -37,7 +37,7 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
     const userData: PostUserType = {
       id,
       firstname,
-      lastname,
+      lastname: lastname || null,
       username,
       email,
       point: 0

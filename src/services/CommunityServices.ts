@@ -1,8 +1,9 @@
 import db from '../config/DBConfig'
 import { type UserPostType } from '../utils/types/CommunityTypes'
-import mapDBToModel from '../utils/mapping/community'
+import { mapDBToModel } from '../utils/mapping/community'
 import dotenv from 'dotenv'
 import UploadServices from './UploadServices'
+import NotFoundError from '../exceptions/NotFoundError'
 
 const uploadServices = new UploadServices()
 dotenv.config({ path: '.env' })
@@ -19,8 +20,10 @@ export default class CommunityServices {
       const query = `SELECT * FROM post
       ORDER BY POST_TIME DESC`
       const [queryResult] = await this._pool.execute(query)
+      if (queryResult.length === 0) throw new NotFoundError('Post not found')
+      const formattedResult = queryResult.map(mapDBToModel)
       console.log(queryResult)
-      return queryResult
+      return formattedResult
     } catch (error) {
       console.error(error)
       throw error

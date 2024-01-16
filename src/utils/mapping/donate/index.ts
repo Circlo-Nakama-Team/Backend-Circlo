@@ -29,7 +29,7 @@ const mapDBToModelUserDonate = ({
   },
   user: {
     userId: USERID,
-    donorName: `${FIRSTNAME} ${LASTNAME}`,
+    donorName: `${FIRSTNAME}${!LASTNAME ? '' : ' ' + LASTNAME}`,
     donorEmail: EMAIL
   },
   donateWeight: DONATE_WEIGHT,
