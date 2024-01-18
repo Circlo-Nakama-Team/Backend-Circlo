@@ -79,6 +79,7 @@ router.put('/profile', upload.single('image'), async (req: Request, res: Respons
       }
     })
   } catch (error) {
+    console.log(error)
     next(error)
   }
 })
@@ -112,6 +113,21 @@ router.get('/profile/address/:id', async (req: Request, res: Response, next: Nex
       data: {
         addressData
       }
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.put('/profile/address/:id', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const { id: addressId } = req.params
+    const credential: string | undefined = req.headers.authorization
+    if (!credential) throw new AuthenticationError('Authorization Header Required')
+    await handler.putAddressHandler(credential, addressId, req.body)
+    res.status(200).json({
+      status: 'Success',
+      message: 'Success Update User Address'
     })
   } catch (error) {
     next(error)

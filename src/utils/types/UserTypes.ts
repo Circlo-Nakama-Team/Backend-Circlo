@@ -6,6 +6,14 @@ export interface CreateUserRequestBodyType {
   password: string
 }
 
+export interface CreateUserGoogleRequestBodyType {
+  userId: string
+  firstname: string
+  lastname: string
+  username: string
+  email: string
+}
+
 export interface LoginBodyType {
   email: string
   password: string
@@ -14,7 +22,7 @@ export interface LoginBodyType {
 export interface PostUserType {
   id: string
   firstname: string
-  lastname: string
+  lastname: any
   username: string
   email: string
   point: number
@@ -35,4 +43,5 @@ export interface MapDBModelUserAddressType {
   USERID: string
   ADDRESS: string
   DETAIL_ADDRESS: string
+  TITLE: string
 }

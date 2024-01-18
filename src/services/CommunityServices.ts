@@ -1,8 +1,9 @@
 import db from '../config/DBConfig'
 import { type UserPostType } from '../utils/types/CommunityTypes'
-import mapDBToModel from '../utils/mapping/community'
+import { mapDBToModel } from '../utils/mapping/community'
 import dotenv from 'dotenv'
 import UploadServices from './UploadServices'
+import NotFoundError from '../exceptions/NotFoundError'
 
 const uploadServices = new UploadServices()
 dotenv.config({ path: '.env' })
@@ -19,8 +20,10 @@ export default class CommunityServices {
       const query = `SELECT * FROM post
       ORDER BY POST_TIME DESC`
       const [queryResult] = await this._pool.execute(query)
+      if (queryResult.length === 0) throw new NotFoundError('Post not found')
+      const formattedResult = queryResult.map(mapDBToModel)
       console.log(queryResult)
-      return queryResult
+      return formattedResult
     } catch (error) {
       console.error(error)
       throw error
@@ -69,6 +72,20 @@ export default class CommunityServices {
       const query = 'UPDATE post SET POST_LIKES = POST_LIKES - 1 WHERE POST_ID = ?'
       const values = [idPost]
       await this._pool.execute(query, values)
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  }
+
+  async checkPostExist (idPost: string): Promise<void> {
+    const query = 'SELECT POST_ID FROM post WHERE POST_ID = ?'
+    const values = [idPost]
+    try {
+      const [queryResult] = await this._pool.execute(query, values)
+      if (queryResult.length === 0) {
+        throw new NotFoundError('Post Not Found!')
+      }
     } catch (error) {
       console.error(error)
       throw error

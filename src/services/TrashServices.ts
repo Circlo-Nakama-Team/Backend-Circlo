@@ -1,7 +1,6 @@
 import db from '../config/DBConfig'
 import dotenv from 'dotenv'
-import { nanoid } from 'nanoid'
-import { mapDBToModelUserDonate } from '../utils/mapping/donate'
+import { mapDBModelTrashCategories } from '../utils/mapping/trash'
 import NotFoundError from '../exceptions/NotFoundError'
 dotenv.config({ path: '.env' })
 export default class DonateServices {
@@ -16,6 +15,18 @@ export default class DonateServices {
         INNER JOIN categories ON trash.CATEGORIESID = categories.CATEGORIESID`
       const [result] = await this._pool.execute(query)
       return result
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  async getTrashCategoriesList (): Promise<any> {
+    try {
+      const query = 'SELECT * FROM categories'
+      const [result] = await this._pool.execute(query)
+      const formattedResult = await result.map(mapDBModelTrashCategories)
+      return formattedResult
     } catch (error) {
       console.log(error)
       throw error
@@ -38,17 +49,21 @@ export default class DonateServices {
 
   async getTrashIdeas (trashId: string): Promise<any> {
     try {
-      const query = `SELECT IDEASID AS ideasId, IDEAS_NAME AS ideasName, IMAGE AS ideasImage, DESCRIPTION AS ideasDescription FROM ideas
+      const query = `SELECT IDEASID AS ideasId, IDEAS_NAME AS ideasName, IMAGE AS ideasImage, DESCRIPTION AS ideasDescription, PRICE AS potensial_price FROM ideas
       WHERE ideas.TRASHID = ?`
       const values = [trashId]
       const [result] = await this._pool.execute(query, values)
 
       if (result.length !== 0) {
-        const queryLink = 'SELECT LINK AS tutorialLink, SOURCE AS linkSource FROM tutorial WHERE IDEASID = ?'
+        const queryLink = 'SELECT TITLE AS title, LINK AS tutorialLink, SOURCE AS linkSource, CREATOR AS creator FROM tutorial WHERE IDEASID = ?'
+        const queryBenefits = 'SELECT DESCRIPTION AS description FROM ideas_benefit WHERE IDEASID = ?'
         await Promise.all(result.map(async (trash: any): Promise<any> => {
-          const linkValues = [trash.ideasId]
-          const [Linkresult] = await this._pool.execute(queryLink, linkValues)
-          trash.link = Linkresult
+          const linkAndBenefitsValues = [trash.ideasId]
+          const [linkResult] = await this._pool.execute(queryLink, linkAndBenefitsValues)
+          const [benefitsResult] = await this._pool.execute(queryBenefits, linkAndBenefitsValues)
+          const formattedBenefitList = await benefitsResult.map((benefit: any) => benefit.description)
+          trash.link = linkResult
+          trash.benefits = formattedBenefitList
         }))
       }
       return result

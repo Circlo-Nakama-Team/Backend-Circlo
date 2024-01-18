@@ -30,6 +30,17 @@ export default class UploadServices {
     }
   }
 
+  async uploadDonateImage (filename: string, buffer: any): Promise<string | any> {
+    try {
+      const file = bucket.file(`Donate/${filename}`)
+      await file.save(buffer)
+      return file.name
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
   async uploadPredictImage (filename: string, buffer: any): Promise<any> {
     try {
       const file = bucket.file(`Predict/${filename}`)

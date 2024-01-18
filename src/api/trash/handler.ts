@@ -2,12 +2,16 @@ import axios from 'axios'
 import { Readable } from 'stream'
 import FormData from 'form-data'
 
+import authorize from '../../services/AuthorizationServices'
+import TrashValidator from '../../validator/trash'
 export default class TrashHandler {
   _service: any
   _uploadServices: any
+  _validator: any
   constructor (services: any, uploadServices: any) {
     this._service = services
     this._uploadServices = uploadServices
+    this._validator = TrashValidator
   }
 
   async getTrashes (): Promise<any> {
@@ -20,9 +24,22 @@ export default class TrashHandler {
     }
   }
 
-  async getTrashIdeas (image: any): Promise<any> {
+  async getTrashCategories (): Promise<any> {
     try {
-      const { originalname, buffer } = image
+      const trashData = await this._service.getTrashCategoriesList()
+      return trashData
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  async getTrashIdeas (credential: string, image: any): Promise<any> {
+    try {
+      await authorize(credential)
+
+      const { originalname, buffer, mimetype } = image
+      await this._validator.validateImagePredictPayload({ image: mimetype })
       const { filename, file: filePredict } = await this._uploadServices.uploadPredictImage(originalname, buffer)
       const signedUrl = await filePredict.getSignedUrl({
         action: 'read',
@@ -71,7 +88,6 @@ export default class TrashHandler {
           ideas
         }
       }))
-      // console.log(formattedArray)
       return formattedArray
     } catch (error) {
       console.log(error)

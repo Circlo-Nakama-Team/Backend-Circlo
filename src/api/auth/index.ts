@@ -4,25 +4,31 @@ import dotenv from 'dotenv'
 import { nanoid } from 'nanoid'
 import { getAuth, signInWithEmailAndPassword, sendEmailVerification, createUserWithEmailAndPassword } from 'firebase/auth'
 import { sendEmailVerificationLink } from '../../services/EmailServices'
+import axios from 'axios'
 
 import UserServices from '../../services/UserServices'
 import admin from '../../config/FirebaseAdmin'
 import app from '../../config/FirebaseConfig'
 import UsersValidator from '../../validator/user'
-import { type PostUserType, type CreateUserRequestBodyType, type LoginBodyType } from '../../utils/types/UserTypes'
+import { type PostUserType, type CreateUserRequestBodyType, type LoginBodyType, type CreateUserGoogleRequestBodyType } from '../../utils/types/UserTypes'
 
 import AuthenticationServices from '../../services/AuthenticationServices'
 import AuthenticationError from '../../exceptions/AuthenticationError'
 
 dotenv.config({ path: '.env' })
+const params = new URLSearchParams()
 const router = express.Router()
 const upload = multer()
 const userServices = new UserServices()
 const auth = getAuth(app)
 
 const actionCodeSettings = {
-  url: 'http://localhost:5000/auth/verifyemail', // Set the URL where the user will be directed after clicking the email verification link
-  handleCodeInApp: true
+  url: 'http://localhost:5000' // Set the URL where the user will be directed after clicking the email verification link
+  // android: {
+  //   packageName: 'com.nakama.circlo',
+  //   installApp: true,
+  //   minimumVersion: '12'
+  // },
 }
 
 router.post('/register', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
@@ -33,12 +39,11 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
     const userData: PostUserType = {
       id,
       firstname,
-      lastname,
+      lastname: lastname || null,
       username,
       email,
       point: 0
     }
-    await userServices.addUser(userData)
     // const userRecord = await createUserWithEmailAndPassword(auth, email, password)
     // console.log(userRecord.user)
     // await sendEmailVerification(userRecord.user)
@@ -50,7 +55,7 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
       photoURL: `${process.env.GS_URL}/User/profil.jpg`,
       disabled: false
     })
-    // const userRecord: any = await admin.auth().createUser({
+    // await admin.auth().createUser({
     //   uid: id,
     //   displayName: username,
     //   email,
@@ -58,11 +63,13 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
     //   photoURL: `${process.env.GS_URL}/User/profil.jpg`,
     //   disabled: true
     // }).then(async (userRecord: any): Promise<any> => {
+    //   console.log(userRecord)
     //   await admin.auth().generateEmailVerificationLink(userRecord.email, actionCodeSettings).then(async (link): Promise<any> => {
     //     console.log(link)
     //     await sendEmailVerificationLink(userRecord.email, userRecord.displayName, link)
     //   })
     // })
+    await userServices.addUser(userData)
 
     res.status(201).send({
       status: 'Success',
@@ -76,6 +83,32 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
     //   message: 'Please verify your email, The link has been sent to your email'
     // })
   } catch (error: any) {
+    console.log(error)
+    next(error)
+  }
+})
+
+router.post('/register-google', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    UsersValidator.validateUserRegisterGooglePayload(req.body)
+    const userData: PostUserType = {
+      id: req.body.userId,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname || null,
+      username: req.body.username,
+      email: req.body.email,
+      point: 0
+    }
+    await userServices.addUser(userData)
+
+    res.status(201).send({
+      status: 'Success',
+      message: 'Success Add User',
+      data: {
+        userId: req.body.userId
+      }
+    })
+  } catch (error) {
     console.log(error)
     next(error)
   }
@@ -121,6 +154,24 @@ router.post('/logout', async (req: Request, res: Response, next: NextFunction) =
     } catch (error) {
       next(error)
     }
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post('/refresh-token', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { refreshToken } = req.body
+
+    params.append('grant_type', 'refresh_token')
+    params.append('refresh_token', refreshToken)
+
+    const refreshingToken = await axios.post(`https://securetoken.googleapis.com/v1/token?key=${process.env.API_KEY}`, params, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+    res.status(201).json({ status: 'Success', message: 'Refreshing Access Token Success', credential: refreshingToken.data.access_token })
   } catch (error) {
     next(error)
   }

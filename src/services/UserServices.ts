@@ -17,12 +17,11 @@ export default class UserServices {
   }
 
   async addUser (data: PostUserType): Promise<string | any> {
-    const query = 'INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)'
-    const values = [data.id, data.firstname, data.lastname, data.username, data.email, data.point, null]
-
     try {
-      const result = await this._pool.execute(query, values)
-      return result
+      const query = 'INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)'
+      const values = [data.id, data.firstname, data.lastname, data.username, data.email, data.point, null]
+
+      await this._pool.execute(query, values)
     } catch (error) {
       console.error(error)
       throw error
@@ -34,13 +33,14 @@ export default class UserServices {
       const userQuery = 'SELECT FIRSTNAME,LASTNAME,POINT,MAIN_ADDRESSID FROM user WHERE USERID = ?'
       const values = [id]
 
-      const [queryResult] = await this._pool.execute(userQuery, values)
       const userRecord = await admin.auth().getUser(id)
-
+      const [queryResult] = await this._pool.execute(userQuery, values)
+      if (queryResult.length === 0) throw new NotFoundError('User Not Found!')
+      const lastname = queryResult[0].LASTNAME ? queryResult[0].LASTNAME : null
       const userData = {
         id: userRecord.uid,
         firstname: queryResult[0].FIRSTNAME,
-        lastname: queryResult[0].LASTNAME,
+        lastname,
         username: userRecord.displayName,
         email: userRecord.email,
         image: userRecord.photoURL,
@@ -72,9 +72,9 @@ export default class UserServices {
       }
       if (payload.image) {
         const filename = await this._uploadServices.uploadUserImage(payload.image.originalname, payload.image.buffer)
+        const encodedFilename = filename.replace(/ /g, '%20')
         await admin.auth().updateUser(id, {
-          displayName: payload.username,
-          photoURL: `${process.env.GS_URL}/${filename}`
+          photoURL: `${process.env.GS_URL}/${encodedFilename}`
         })
       }
 
@@ -93,8 +93,8 @@ export default class UserServices {
   async addAddressUser (idUser: string, payload: any): Promise<string | any> {
     try {
       const id = `address-${nanoid(10)}`
-      const query = 'INSERT INTO address VALUES (?, ?, ?, ?)'
-      const values = [id, idUser, payload.address, payload.detail_address]
+      const query = 'INSERT INTO address VALUES (?, ?, ?, ?, ?)'
+      const values = [id, idUser, payload.address, payload.detail_address, payload.addressTitle]
 
       await this._pool.execute(query, values)
 
@@ -106,11 +106,51 @@ export default class UserServices {
     }
   }
 
+  async updateAddressUser (id: string, addressId: string, payload: any): Promise<void> {
+    try {
+      const queryState = []
+      const queryValues = []
+      if (payload.address) {
+        queryState.push('ADDRESS = ?')
+        queryValues.push(payload.address)
+      }
+      if (payload.detail_address) {
+        queryState.push('DETAIL_ADDRESS = ?')
+        queryValues.push(payload.detail_address)
+      }
+      if (payload.addressTitle) {
+        queryState.push('TITLE = ?')
+        queryValues.push(payload.addressTitle)
+      }
+
+      const queryPropertyString: string = queryState.join(', ')
+      queryValues.push(id)
+      queryValues.push(addressId)
+      const query = `UPDATE address SET ${queryPropertyString} WHERE USERID = ? AND ADDRESSID = ?`
+      await this._pool.execute(query, queryValues)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  async checkUserAddressExist (idAddress: string, userId: string): Promise<void> {
+    const query = 'SELECT ADDRESSID,USERID FROM address WHERE ADDRESSID = ? AND USERID = ?'
+    const values = [idAddress, userId]
+    const [queryResult] = await this._pool.execute(query, values)
+    if (queryResult.length === 0) {
+      throw new NotFoundError('User Address Not Found!')
+    }
+  }
+
   async verifiedAddressExist (idAddress: string): Promise <string | any> {
     try {
       const query = 'SELECT ADDRESSID,USERID FROM address WHERE ADDRESSID = ?'
       const values = [idAddress]
       const [queryResult] = await this._pool.execute(query, values)
+      if (queryResult.length === 0) {
+        throw new NotFoundError('User Address Not Found!')
+      }
       return {
         userId: queryResult[0].USERID,
         addressId: queryResult[0].ADDRESSID
@@ -140,6 +180,8 @@ export default class UserServices {
       const values = [id, addressId]
 
       const [queryResult] = await this._pool.execute(query, values)
+      if (queryResult.length === 0) throw new NotFoundError('User Address Not Found!')
+
       const formattedQueryResult = queryResult.map(mapDBToModelUserAddress)
       console.log(queryResult)
       return formattedQueryResult
