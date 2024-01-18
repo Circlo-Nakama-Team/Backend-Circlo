@@ -20,7 +20,7 @@ app.use(bodyParser.json())
 
 const errorHandlingMiddleware = (err: Error, req: Request, res: Response, next: NextFunction): any => {
   if (err instanceof ClientError) {
-    res.status(err.statusCode).json({
+    return res.status(err.statusCode).json({
       status: 'Failed',
       message: err.message
     })

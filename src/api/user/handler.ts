@@ -91,6 +91,7 @@ export default class UserHandler {
       const decodedToken = await authorize(credential)
       const { uid: id }: any = decodedToken
       this._validator.validateUpdateUserAddressPayload(payload)
+      await this._service.checkUserAddressExist(addressId, id)
       await this._service.updateAddressUser(id, addressId, payload)
     } catch (error) {
       console.log(error)
@@ -102,6 +103,7 @@ export default class UserHandler {
     try {
       const decodedToken = await authorize(credential)
       const { uid: id }: any = decodedToken
+      await this._service.checkUserAddressExist(addressId, id)
       await this._service.deleteAddressUser(id, addressId)
     } catch (error) {
       console.log(error)

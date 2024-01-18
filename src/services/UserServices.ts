@@ -33,8 +33,9 @@ export default class UserServices {
       const userQuery = 'SELECT FIRSTNAME,LASTNAME,POINT,MAIN_ADDRESSID FROM user WHERE USERID = ?'
       const values = [id]
 
-      const [queryResult] = await this._pool.execute(userQuery, values)
       const userRecord = await admin.auth().getUser(id)
+      const [queryResult] = await this._pool.execute(userQuery, values)
+      if (queryResult.length === 0) throw new NotFoundError('User Not Found!')
       const lastname = queryResult[0].LASTNAME ? queryResult[0].LASTNAME : null
       const userData = {
         id: userRecord.uid,
@@ -133,11 +134,23 @@ export default class UserServices {
     }
   }
 
+  async checkUserAddressExist (idAddress: string, userId: string): Promise<void> {
+    const query = 'SELECT ADDRESSID,USERID FROM address WHERE ADDRESSID = ? AND USERID = ?'
+    const values = [idAddress, userId]
+    const [queryResult] = await this._pool.execute(query, values)
+    if (queryResult.length === 0) {
+      throw new NotFoundError('User Address Not Found!')
+    }
+  }
+
   async verifiedAddressExist (idAddress: string): Promise <string | any> {
     try {
       const query = 'SELECT ADDRESSID,USERID FROM address WHERE ADDRESSID = ?'
       const values = [idAddress]
       const [queryResult] = await this._pool.execute(query, values)
+      if (queryResult.length === 0) {
+        throw new NotFoundError('User Address Not Found!')
+      }
       return {
         userId: queryResult[0].USERID,
         addressId: queryResult[0].ADDRESSID
@@ -167,6 +180,8 @@ export default class UserServices {
       const values = [id, addressId]
 
       const [queryResult] = await this._pool.execute(query, values)
+      if (queryResult.length === 0) throw new NotFoundError('User Address Not Found!')
+
       const formattedQueryResult = queryResult.map(mapDBToModelUserAddress)
       console.log(queryResult)
       return formattedQueryResult

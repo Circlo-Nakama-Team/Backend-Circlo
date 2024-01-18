@@ -5,6 +5,7 @@ const authorize = async (credential: string): Promise<any> => {
   try {
     const checkRevoked = true
     const token = credential.split(' ')[1]
+    console.log(credential)
     const decodedToken = await admin.auth().verifyIdToken(token, checkRevoked)
     return decodedToken
   } catch (error) {

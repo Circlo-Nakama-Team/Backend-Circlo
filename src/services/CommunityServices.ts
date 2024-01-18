@@ -77,4 +77,18 @@ export default class CommunityServices {
       throw error
     }
   }
+
+  async checkPostExist (idPost: string): Promise<void> {
+    const query = 'SELECT POST_ID FROM post WHERE POST_ID = ?'
+    const values = [idPost]
+    try {
+      const [queryResult] = await this._pool.execute(query, values)
+      if (queryResult.length === 0) {
+        throw new NotFoundError('Post Not Found!')
+      }
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  }
 }

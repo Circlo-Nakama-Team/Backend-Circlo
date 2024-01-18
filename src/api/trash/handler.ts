@@ -3,13 +3,15 @@ import { Readable } from 'stream'
 import FormData from 'form-data'
 
 import authorize from '../../services/AuthorizationServices'
-
+import TrashValidator from '../../validator/trash'
 export default class TrashHandler {
   _service: any
   _uploadServices: any
+  _validator: any
   constructor (services: any, uploadServices: any) {
     this._service = services
     this._uploadServices = uploadServices
+    this._validator = TrashValidator
   }
 
   async getTrashes (): Promise<any> {
@@ -36,7 +38,8 @@ export default class TrashHandler {
     try {
       await authorize(credential)
 
-      const { originalname, buffer } = image
+      const { originalname, buffer, mimetype } = image
+      await this._validator.validateImagePredictPayload({ image: mimetype })
       const { filename, file: filePredict } = await this._uploadServices.uploadPredictImage(originalname, buffer)
       const signedUrl = await filePredict.getSignedUrl({
         action: 'read',

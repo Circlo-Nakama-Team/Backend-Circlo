@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import { nanoid } from 'nanoid'
 import { getAuth, signInWithEmailAndPassword, sendEmailVerification, createUserWithEmailAndPassword } from 'firebase/auth'
 import { sendEmailVerificationLink } from '../../services/EmailServices'
+import axios from 'axios'
 
 import UserServices from '../../services/UserServices'
 import admin from '../../config/FirebaseAdmin'
@@ -15,6 +16,7 @@ import AuthenticationServices from '../../services/AuthenticationServices'
 import AuthenticationError from '../../exceptions/AuthenticationError'
 
 dotenv.config({ path: '.env' })
+const params = new URLSearchParams()
 const router = express.Router()
 const upload = multer()
 const userServices = new UserServices()
@@ -152,6 +154,24 @@ router.post('/logout', async (req: Request, res: Response, next: NextFunction) =
     } catch (error) {
       next(error)
     }
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post('/refresh-token', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { refreshToken } = req.body
+
+    params.append('grant_type', 'refresh_token')
+    params.append('refresh_token', refreshToken)
+
+    const refreshingToken = await axios.post(`https://securetoken.googleapis.com/v1/token?key=${process.env.API_KEY}`, params, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+    res.status(201).json({ status: 'Success', message: 'Refreshing Access Token Success', credential: refreshingToken.data.access_token })
   } catch (error) {
     next(error)
   }

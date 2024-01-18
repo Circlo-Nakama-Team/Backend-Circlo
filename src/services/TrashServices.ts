@@ -49,7 +49,7 @@ export default class DonateServices {
 
   async getTrashIdeas (trashId: string): Promise<any> {
     try {
-      const query = `SELECT IDEASID AS ideasId, IDEAS_NAME AS ideasName, IMAGE AS ideasImage, DESCRIPTION AS ideasDescription FROM ideas
+      const query = `SELECT IDEASID AS ideasId, IDEAS_NAME AS ideasName, IMAGE AS ideasImage, DESCRIPTION AS ideasDescription, PRICE AS potensial_price FROM ideas
       WHERE ideas.TRASHID = ?`
       const values = [trashId]
       const [result] = await this._pool.execute(query, values)
