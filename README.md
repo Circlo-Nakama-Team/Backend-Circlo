@@ -1,26 +1,28 @@
 # Circlo Backend
+---------------------
+## OVERVIEW
+The Backend-Circlo repository focuses on creating a REST API that will be used by applications. The Circlo application REST API is created using the Typescript programming language with ExpressJs as the framework, MySQL as the database, and Firebase for authentication.
 ## How To Run The Code
-1. Setup firebase project
-2. Setup Web App di firebase
-3. Masukkan value config web app ke .env dan simpan service account credential di root folder
-4. Sesuaikan file FirebaseAdmin dengan service account yang telah dibuat
-5. Setup project di Google Cloud, buat service account untuk aplikasi dan beri role firebase admin
-6. Simpan credential di root folder
-7. Sesuaikan file storageConfig dengan service account yang baru dibuat
-8. Buat bucket di Google Cloud Storage dan buat folder Post, Predict, Trash, User, Donate, dan Ideas.
-9. buat database bernama "hackfest" di phpmyadmin
-10. import file sql
-11. Sesuaikan DbConfig dengan database yang telah dibuat
-12. Deploy ML dari repo ML
+1. Set up the firebase project
+2. Setup Web App in firebase
+3. Enter the web app config values ​​into .env and save the service account credentials in the root folder
+4. Adjust the FirebaseAdmin file with the service account that has been created
+5. Set up the project in Google Cloud, create a service account for the application and give it the firebase admin role
+6. Save the credentials in the root folder
+7. Adjust the storageConfig file with the newly created service account
+8. Create a bucket in Google Cloud Storage and create Post, Predict, Trash, User, Donate and Ideas folders.
+9. create a database named "hackfest" in phpmyadmin
+10. import sql file
+11. Adjust DbConfig to the database that has been created
+12. Deploy ML from ML repo
 13. Install dependencies
-14. Run program dengan perintah 'npm run start-dev' pada terminal
+14. Run the program with the command 'npm run start-dev' in the terminal
 
 ## Documentation
 API Docs Link: https://documenter.getpostman.com/view/28684250/2s9YsM8WHn
 Collection Link: https://drive.google.com/file/d/1_LCnH_1gZibQS040rOsE0P1sBj9-mMBT/view?usp=sharing
 
 ## Notes
-* Task Sequence 2 adalah getTrashIdeas seperti yang ada di API DOCS
-* link .env (contoh) : https://drive.google.com/file/d/1HLWJ7cRFdSUIZPQRdCtJr_3NkSHTLS1r/view?usp=sharing  
+* .env link (example): https://drive.google.com/file/d/1HLWJ7cRFdSUIZPQRdCtJr_3NkSHTLS1r/view?usp=sharing
 * Main API Server Link: https://circlo-backend2-sxilj6bmva-et.a.run.app
 * ML Server Link: https://ml-hackfest2-dot-circlo-635bd.et.r.appspot.com
