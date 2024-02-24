@@ -1,6 +1,6 @@
 # Circlo Backend
 ---------------------
-## OVERVIEW
+## Overview
 The Backend-Circlo repository focuses on creating a REST API that will be used by applications. The Circlo application REST API is created using the Typescript programming language with ExpressJs as the framework, MySQL as the database, and Firebase for authentication.
 ## How To Run The Code
 1. Set up the firebase project
