@@ -2,7 +2,7 @@ import express, { type Request, type Response, type NextFunction } from 'express
 import multer from 'multer'
 import dotenv from 'dotenv'
 import { nanoid } from 'nanoid'
-import { getAuth, signInWithEmailAndPassword, sendEmailVerification, createUserWithEmailAndPassword } from 'firebase/auth'
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { sendEmailVerificationLink } from '../../services/EmailServices'
 import axios from 'axios'
 
@@ -15,21 +15,16 @@ import { type PostUserType, type CreateUserRequestBodyType, type LoginBodyType, 
 import AuthenticationServices from '../../services/AuthenticationServices'
 import AuthenticationError from '../../exceptions/AuthenticationError'
 
+import OauthServices from '../../services/OauthServices'
+
 dotenv.config({ path: '.env' })
 const params = new URLSearchParams()
 const router = express.Router()
 const upload = multer()
 const userServices = new UserServices()
+const oauthServices = new OauthServices()
 const auth = getAuth(app)
 
-const actionCodeSettings = {
-  url: 'http://localhost:5000' // Set the URL where the user will be directed after clicking the email verification link
-  // android: {
-  //   packageName: 'com.nakama.circlo',
-  //   installApp: true,
-  //   minimumVersion: '12'
-  // },
-}
 
 router.post('/register', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
@@ -88,30 +83,64 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
   }
 })
 
-router.post('/register-google', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    UsersValidator.validateUserRegisterGooglePayload(req.body)
-    const userData: PostUserType = {
-      id: req.body.userId,
-      firstname: req.body.firstname,
-      lastname: req.body.lastname || null,
-      username: req.body.username,
-      email: req.body.email,
-      point: 0
-    }
-    await userServices.addUser(userData)
+// router.post('/register-google', async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     UsersValidator.validateUserRegisterGooglePayload(req.body)
+//     const userData: PostUserType = {
+//       id: req.body.userId,
+//       firstname: req.body.firstname,
+//       lastname: req.body.lastname || null,
+//       username: req.body.username,
+//       email: req.body.email,
+//       point: 0
+//     }
+//     await userServices.addUser(userData)
 
-    res.status(201).send({
-      status: 'Success',
-      message: 'Success Add User',
-      data: {
-        userId: req.body.userId
-      }
-    })
+//     res.status(201).send({
+//       status: 'Success',
+//       message: 'Success Add User',
+//       data: {
+//         userId: req.body.userId
+//       }
+//     })
+//   } catch (error) {
+//     console.log(error)
+//     next(error)
+//   }
+// })
+
+router.get('/oauth', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authUrl = await oauthServices.getAuthUrl()
+    res.redirect(authUrl)
   } catch (error) {
     console.log(error)
     next(error)
   }
+})
+
+router.get('/google/callback', async (req: Request, res: Response, next: NextFunction) => {
+  const { code } = req.query
+  const oAuth2Client = await oauthServices._client
+  const { tokens } = await oAuth2Client.getToken(code)
+  oAuth2Client.setCredentials(tokens)
+  const userData = await oauthServices.getUserData(oAuth2Client)
+  res.status(200).send({
+    status: 'success',
+    message: 'Masuk Berhasil',
+    data: {
+      token: {
+        credential: tokens.id_token,
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token
+      },
+      userData: {
+        name: userData.given_name,
+        email: userData.email,
+        image: userData.picture
+      }
+    }
+  })
 })
 
 router.post('/login', async (req: Request, res: Response, next: NextFunction) => {

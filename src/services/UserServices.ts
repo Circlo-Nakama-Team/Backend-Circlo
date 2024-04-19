@@ -54,6 +54,15 @@ export default class UserServices {
     }
   }
 
+  async getUserIdByEmail (email: string): Promise<string> {
+    const userQuery = 'SELECT USERID FROM user WHERE EMAIL = ?'
+    const values = [email]
+
+    const [queryResult] = await this._pool.execute(userQuery, values)
+    console.log(queryResult)
+    return queryResult[0].USERID
+  }
+
   async updateUser (id: string, payload: any): Promise<string | any> {
     try {
       const queryProperty = []

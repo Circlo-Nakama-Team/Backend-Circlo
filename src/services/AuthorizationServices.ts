@@ -1,15 +1,29 @@
 import AuthorizationError from '../exceptions/AuthorizationError'
 import admin from 'firebase-admin'
+import OauthServices from './OauthServices'
+import UserServices from './UserServices'
+
+const oauthServices = new OauthServices()
+const userServices = new UserServices()
 
 const authorize = async (credential: string): Promise<any> => {
+  const checkRevoked = true
+  const token = credential.split(' ')[1]
   try {
-    const checkRevoked = true
-    const token = credential.split(' ')[1]
     console.log(credential)
     const decodedToken = await admin.auth().verifyIdToken(token, checkRevoked)
     return decodedToken
   } catch (error) {
-    throw new AuthorizationError('Unauthorized Request')
+    try {
+      const { payload } = await oauthServices.validateToken(token)
+      const { email } = payload
+      console.log(email)
+      const userId = await userServices.getUserIdByEmail(email)
+      console.log(userId)
+      return { uid: userId }
+    } catch (error) {
+      throw new AuthorizationError('Unauthorized Request')
+    }
   }
 }
 

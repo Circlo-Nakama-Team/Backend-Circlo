@@ -1,5 +1,6 @@
 import express, { type Express, type Request, type Response, type NextFunction } from 'express'
 import dotenv from 'dotenv'
+dotenv.config({ path: '.env' })
 import path from 'path'
 import cors from 'cors'
 import UserAPI from './api/user'
@@ -11,9 +12,8 @@ import bodyParser from 'body-parser'
 import ClientError from './exceptions/ClientError'
 import favicon from 'express-favicon'
 
-dotenv.config({ path: '.env' })
 const app: Express = express()
-const port = 8080
+const port = 5000
 
 app.use(cors())
 app.use(bodyParser.json())
@@ -53,5 +53,5 @@ app.use('/trash', TrashAPI)
 
 app.use(errorHandlingMiddleware)
 app.listen(port, () => {
-  console.log(`[server]: Server is running at port: ${port}`)
+  console.log(`[server]: Server is running at http://localhost:${port}`)
 })
