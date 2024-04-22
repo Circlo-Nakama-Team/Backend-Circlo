@@ -18,8 +18,8 @@ export default class UserServices {
 
   async addUser (data: PostUserType): Promise<string | any> {
     try {
-      const query = 'INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)'
-      const values = [data.id, data.firstname, data.lastname, data.username, data.email, data.point, null]
+      const query = 'INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+      const values = [data.id, data.firstname, data.lastname, data.username, data.email, data.point, null, null]
 
       await this._pool.execute(query, values)
     } catch (error) {
@@ -206,7 +206,27 @@ export default class UserServices {
       const values = [userId, addressId]
       await this._pool.execute(query, values)
     } catch (error) {
-      console.log(error)
+      throw error
+    }
+  }
+
+  async updateFcmToken (fcmToken: string, email: string): Promise<void> {
+    try {
+      const query = 'UPDATE users SET FCM_TOKEN = ? WHERE EMAIL = ?'
+      const values = [fcmToken, email]
+      await this._pool.execute(query, values)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async getFcmToken (email: string): Promise<string> {
+    try {
+      const query = 'SELECT FCM_TOKEN FROM users WHERE EMAIL = ?'
+      const values = [email]
+      const [queryResult] = await this._pool.execute(query, values)
+      return queryResult[0].FCM_TOKEN
+    } catch (error) {
       throw error
     }
   }

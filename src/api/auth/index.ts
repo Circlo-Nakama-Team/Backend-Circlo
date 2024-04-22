@@ -148,13 +148,15 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
     UsersValidator.validateUserLoginPayload(req.body)
     const user: LoginBodyType = {
       email: req.body.email,
-      password: req.body.password
+      password: req.body.password,
+      fcmToken: req.body.fcmToken
     }
     // const isEmailVerified = await admin.auth().getUserByEmail(user.email)
     // console.log(isEmailVerified)
     const signInResponse = await signInWithEmailAndPassword(auth, user.email, user.password)
     const credential = await signInResponse.user.getIdToken(true)
     const refreshToken = signInResponse.user.refreshToken
+    await userServices.updateFcmToken(user.fcmToken, user.email)
     res.status(200).send({
       status: 'success',
       message: 'Masuk Berhasil',
