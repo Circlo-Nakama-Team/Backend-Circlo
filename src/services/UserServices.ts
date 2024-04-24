@@ -1,13 +1,14 @@
 import db from '../config/DBConfig'
 import { type PostUserType } from '../utils/types/UserTypes'
 import admin from 'firebase-admin'
-import dotenv from 'dotenv'
 import UploadServices from './UploadServices'
 import { nanoid } from 'nanoid'
 import NotFoundError from '../exceptions/NotFoundError'
 import { mapDBToModelUserAddress } from '../utils/mapping/users'
+import config from '../config/EnvConfig'
+
 const uploadServices = new UploadServices()
-dotenv.config({ path: '.env' })
+
 export default class UserServices {
   _pool: any
   _uploadServices: any
@@ -83,7 +84,7 @@ export default class UserServices {
         const filename = await this._uploadServices.uploadUserImage(payload.image.originalname, payload.image.buffer)
         const encodedFilename = filename.replace(/ /g, '%20')
         await admin.auth().updateUser(id, {
-          photoURL: `${process.env.GS_URL}/${encodedFilename}`
+          photoURL: `${config.GS_URL}/${encodedFilename}`
         })
       }
 
@@ -210,20 +211,20 @@ export default class UserServices {
     }
   }
 
-  async updateFcmToken (fcmToken: string, email: string): Promise<void> {
+  async updateFcmToken (id: string, fcmToken: string): Promise<void> {
     try {
-      const query = 'UPDATE users SET FCM_TOKEN = ? WHERE EMAIL = ?'
-      const values = [fcmToken, email]
+      const query = 'UPDATE user SET FCM_TOKEN = ? WHERE USERID = ?'
+      const values = [fcmToken, id]
       await this._pool.execute(query, values)
     } catch (error) {
       throw error
     }
   }
 
-  async getFcmToken (email: string): Promise<string> {
+  async getFcmToken (id: string): Promise<string> {
     try {
-      const query = 'SELECT FCM_TOKEN FROM users WHERE EMAIL = ?'
-      const values = [email]
+      const query = 'SELECT FCM_TOKEN FROM user WHERE USERID = ?'
+      const values = [id]
       const [queryResult] = await this._pool.execute(query, values)
       return queryResult[0].FCM_TOKEN
     } catch (error) {

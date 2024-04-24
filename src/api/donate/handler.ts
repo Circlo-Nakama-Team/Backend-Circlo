@@ -1,9 +1,10 @@
 import authorize from '../../services/AuthorizationServices'
-import dotenv from 'dotenv'
 import UploadServices from '../../services/UploadServices'
 import { nanoid } from 'nanoid'
+import config from '../../config/EnvConfig'
+
 const uploadServices = new UploadServices()
-dotenv.config({ path: '.env' })
+
 export default class DonateHandler {
   _service: any
   _uploadService: any
@@ -31,7 +32,7 @@ export default class DonateHandler {
         const file = await this._uploadService.uploadDonateImage(filename, image.buffer)
         const encodedFilename = file.replace(/ /g, '%20')
 
-        const link = `${process.env.GS_URL}/${encodedFilename}`
+        const link = `${config.GS_URL}/${encodedFilename}`
         console.log(link)
         this._service.addDonateImage(donateId, imageId, link)
         return

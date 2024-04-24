@@ -1,7 +1,12 @@
 import express, { type Express, type Request, type Response, type NextFunction } from 'express'
 import dotenv from 'dotenv'
+import session from 'express-session'
+import MySQLStore from 'express-mysql-session'
+import config from './config/EnvConfig'
+
 dotenv.config({ path: '.env' })
 import path from 'path'
+import cookieParser from 'cookie-parser';
 import cors from 'cors'
 import UserAPI from './api/user'
 import AuthAPI from './api/auth'
@@ -13,10 +18,27 @@ import ClientError from './exceptions/ClientError'
 import favicon from 'express-favicon'
 
 const app: Express = express()
-const port = 5000
+const port = config.PORT
+// const sessionStore: any = new MySQLStore(dbConfig)
+
+app.use(bodyParser.json())
+app.use(cookieParser())
 
 app.use(cors())
-app.use(bodyParser.json())
+
+// app.use(session({
+//   store: sessionStore,
+//   secret: 'session_cookie_secret',
+//   resave: false,
+//   saveUninitialized: false,
+//   cookie: {
+//     httpOnly: false,
+//     // secure: true,
+//     maxAge: 1000 * 60 * 60 * 24,
+//     signed: false, // Set to false to use the plain session ID
+//     // sameSite: 'none',
+//   },
+// }));
 
 const errorHandlingMiddleware = (err: Error, req: Request, res: Response, next: NextFunction): any => {
   if (err instanceof ClientError) {

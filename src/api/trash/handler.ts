@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { Readable } from 'stream'
 import FormData from 'form-data'
+import config from '../../config/EnvConfig'
 
 import authorize from '../../services/AuthorizationServices'
 import TrashValidator from '../../validator/trash'
@@ -60,7 +61,7 @@ export default class TrashHandler {
       formData.append('file', stream, { filename })
 
       // Make the HTTP request using axios and the FormData object
-      const predictionResponse = await axios.post(`${process.env.ML_SERVER}/predict/image`, formData, {
+      const predictionResponse = await axios.post(`${config.ML_SERVER}/predict/image`, formData, {
         headers: {
           ...formData.getHeaders()
         },

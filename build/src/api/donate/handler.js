@@ -13,11 +13,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const AuthorizationServices_1 = __importDefault(require("../../services/AuthorizationServices"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const UploadServices_1 = __importDefault(require("../../services/UploadServices"));
 const nanoid_1 = require("nanoid");
+const EnvConfig_1 = __importDefault(require("../../config/EnvConfig"));
 const uploadServices = new UploadServices_1.default();
-dotenv_1.default.config({ path: '.env' });
 class DonateHandler {
     constructor(services, validator) {
         this._service = services;
@@ -38,7 +37,7 @@ class DonateHandler {
                     const filename = `${imageId}_${image.originalname}`;
                     const file = yield this._uploadService.uploadDonateImage(filename, image.buffer);
                     const encodedFilename = file.replace(/ /g, '%20');
-                    const link = `${process.env.GS_URL}/${encodedFilename}`;
+                    const link = `${EnvConfig_1.default.GS_URL}/${encodedFilename}`;
                     console.log(link);
                     this._service.addDonateImage(donateId, imageId, link);
                     return;

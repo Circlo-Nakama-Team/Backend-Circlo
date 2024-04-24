@@ -1,5 +1,7 @@
 // import { GoogleAuthProvider, getAuth, signInWithRedirect, getRedirectResult } from 'firebase/auth'
 import { google } from 'googleapis'
+import config from '../config/EnvConfig'
+const {OAuth2Client} = require('google-auth-library');
 
 export default class OauthServices {
   _scope: string[]
@@ -15,9 +17,9 @@ export default class OauthServices {
     ]
 
     this._client = new google.auth.OAuth2(
-      process.env.CLIENT_ID,
-      process.env.CLIENT_SECRET,
-      process.env.REDIRECT_URL
+      config.CLIENT_ID,
+      config.CLIENT_SECRET,
+      config.REDIRECT_URL
     )
     // this._provider.addScope(this._scope)
   }
@@ -38,9 +40,19 @@ export default class OauthServices {
   }
   
   async validateToken (token: string): Promise<any> {
-    return this._client.verifyIdToken({ idToken: token, audience: process.env.CLIENT_ID })
+    try {
+      const ticket = await this._client.verifyIdToken({
+        idToken: token,
+        audience: process.env.CLIENT_ID, // Ensure this matches your OAuth client ID
+      });
+      const payload = ticket.getPayload();
+      console.log('Token Payload:', payload);
+      return payload;
+    } catch (error) {
+      throw new Error('Invalid token');
+    }
   }
-
+  
   // async outhAuthorize (): Promise<any> {
   //   await signInWithRedirect(this._auth, this._provider)
   // }

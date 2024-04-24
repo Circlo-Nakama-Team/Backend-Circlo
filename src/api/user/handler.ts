@@ -110,4 +110,15 @@ export default class UserHandler {
       throw error
     }
   }
+
+  async updateFcmToken (credential: string, fcmToken: string): Promise<void> {
+    try {
+      const decodedToken = await authorize(credential)
+      const { uid: id }: any = decodedToken
+      await this._service.updateFcmToken(id, fcmToken)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
 }

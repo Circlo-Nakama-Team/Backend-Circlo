@@ -13,9 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const DBConfig_1 = __importDefault(require("../config/DBConfig"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const trash_1 = require("../utils/mapping/trash");
-dotenv_1.default.config({ path: '.env' });
 class DonateServices {
     constructor() {
         this._pool = DBConfig_1.default;
@@ -67,7 +65,7 @@ class DonateServices {
     getTrashIdeas(trashId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const query = `SELECT IDEASID AS ideasId, IDEAS_NAME AS ideasName, IMAGE AS ideasImage, DESCRIPTION AS ideasDescription FROM ideas
+                const query = `SELECT IDEASID AS ideasId, IDEAS_NAME AS ideasName, IMAGE AS ideasImage, DESCRIPTION AS ideasDescription, PRICE AS potensial_price FROM ideas
       WHERE ideas.TRASHID = ?`;
                 const values = [trashId];
                 const [result] = yield this._pool.execute(query, values);

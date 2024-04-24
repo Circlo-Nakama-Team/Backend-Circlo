@@ -107,12 +107,41 @@ class UserHandler {
             }
         });
     }
+    putAddressHandler(credential, addressId, payload) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const decodedToken = yield (0, AuthorizationServices_1.default)(credential);
+                const { uid: id } = decodedToken;
+                this._validator.validateUpdateUserAddressPayload(payload);
+                yield this._service.checkUserAddressExist(addressId, id);
+                yield this._service.updateAddressUser(id, addressId, payload);
+            }
+            catch (error) {
+                console.log(error);
+                throw error;
+            }
+        });
+    }
     deleteAddressHandler(credential, addressId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const decodedToken = yield (0, AuthorizationServices_1.default)(credential);
                 const { uid: id } = decodedToken;
+                yield this._service.checkUserAddressExist(addressId, id);
                 yield this._service.deleteAddressUser(id, addressId);
+            }
+            catch (error) {
+                console.log(error);
+                throw error;
+            }
+        });
+    }
+    updateFcmToken(credential, fcmToken) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const decodedToken = yield (0, AuthorizationServices_1.default)(credential);
+                const { uid: id } = decodedToken;
+                yield this._service.updateFcmToken(id, fcmToken);
             }
             catch (error) {
                 console.log(error);

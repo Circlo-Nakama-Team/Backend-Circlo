@@ -149,12 +149,12 @@ router.delete('/profile/address/:addressId', async (req: Request, res: Response,
   }
 })
 
-router.post('fcm-token', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+router.post('/fcm-token', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     const credential: string | undefined = req.headers.authorization
     if (!credential) throw new AuthenticationError('Authorization Header Required')
-    const { fcmToken, email } = req.body
-    await userServices.updateFcmToken(fcmToken, email)
+    const { fcmToken } = req.body
+    await handler.updateFcmToken(credential, fcmToken)
     res.status(200).json({
       status: 'Success',
       message: 'Success Update FCM Token'

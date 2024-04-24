@@ -1,10 +1,8 @@
 import db from '../config/DBConfig'
-import dotenv from 'dotenv'
 import { nanoid } from 'nanoid'
 import moment from 'moment'
 import { mapDBToModelUserDonate, mapDBModelDonateSchedule } from '../utils/mapping/donate'
 import NotFoundError from '../exceptions/NotFoundError'
-dotenv.config({ path: '.env' })
 export default class DonateServices {
   _pool: any
   _uploadServices: any

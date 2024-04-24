@@ -16,8 +16,8 @@ const UserRegisterGooglePayloadSchema = Joi.object({
 })
 const UserLoginPayloadSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().required(),
-  fcmToken: Joi.string().required()
+  password: Joi.string().required()
+  // fcmToken: Joi.string().required()
 })
 const UserUpdatePayloadSchema = Joi.object({
   username: Joi.string(),

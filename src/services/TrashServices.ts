@@ -1,8 +1,6 @@
 import db from '../config/DBConfig'
-import dotenv from 'dotenv'
 import { mapDBModelTrashCategories } from '../utils/mapping/trash'
 import NotFoundError from '../exceptions/NotFoundError'
-dotenv.config({ path: '.env' })
 export default class DonateServices {
   _pool: any
   constructor () {

@@ -14,11 +14,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const DBConfig_1 = __importDefault(require("../config/DBConfig"));
 const community_1 = require("../utils/mapping/community");
-const dotenv_1 = __importDefault(require("dotenv"));
 const UploadServices_1 = __importDefault(require("./UploadServices"));
 const NotFoundError_1 = __importDefault(require("../exceptions/NotFoundError"));
 const uploadServices = new UploadServices_1.default();
-dotenv_1.default.config({ path: '.env' });
 class CommunityServices {
     constructor() {
         this._pool = DBConfig_1.default;
@@ -90,6 +88,22 @@ class CommunityServices {
                 const query = 'UPDATE post SET POST_LIKES = POST_LIKES - 1 WHERE POST_ID = ?';
                 const values = [idPost];
                 yield this._pool.execute(query, values);
+            }
+            catch (error) {
+                console.error(error);
+                throw error;
+            }
+        });
+    }
+    checkPostExist(idPost) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const query = 'SELECT POST_ID FROM post WHERE POST_ID = ?';
+            const values = [idPost];
+            try {
+                const [queryResult] = yield this._pool.execute(query, values);
+                if (queryResult.length === 0) {
+                    throw new NotFoundError_1.default('Post Not Found!');
+                }
             }
             catch (error) {
                 console.error(error);

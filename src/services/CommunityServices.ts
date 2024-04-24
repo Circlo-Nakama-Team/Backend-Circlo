@@ -1,12 +1,10 @@
 import db from '../config/DBConfig'
 import { type UserPostType } from '../utils/types/CommunityTypes'
 import { mapDBToModel } from '../utils/mapping/community'
-import dotenv from 'dotenv'
 import UploadServices from './UploadServices'
 import NotFoundError from '../exceptions/NotFoundError'
 
 const uploadServices = new UploadServices()
-dotenv.config({ path: '.env' })
 export default class CommunityServices {
   _pool: any
   _uploadServices: any

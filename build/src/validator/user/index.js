@@ -35,6 +35,12 @@ const UsersValidator = {
         if (validationResult.error) {
             throw new InvariantError_1.default(validationResult.error.message);
         }
+    },
+    validateUpdateUserAddressPayload: (payload) => {
+        const validationResult = schema_1.UpdateUserAddressPayloadSchema.validate(payload);
+        if (validationResult.error) {
+            throw new InvariantError_1.default(validationResult.error.message);
+        }
     }
 };
 exports.default = UsersValidator;

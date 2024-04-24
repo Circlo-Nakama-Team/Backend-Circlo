@@ -9,8 +9,8 @@ const userServices = new UserServices()
 const authorize = async (credential: string): Promise<any> => {
   const checkRevoked = true
   const token = credential.split(' ')[1]
+  console.log(token)
   try {
-    console.log(credential)
     const decodedToken = await admin.auth().verifyIdToken(token, checkRevoked)
     return decodedToken
   } catch (error) {
@@ -22,6 +22,7 @@ const authorize = async (credential: string): Promise<any> => {
       console.log(userId)
       return { uid: userId }
     } catch (error) {
+      console.log(error)
       throw new AuthorizationError('Unauthorized Request')
     }
   }

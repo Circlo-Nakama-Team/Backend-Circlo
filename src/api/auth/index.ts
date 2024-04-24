@@ -1,6 +1,5 @@
 import express, { type Request, type Response, type NextFunction } from 'express'
 import multer from 'multer'
-import dotenv from 'dotenv'
 import { nanoid } from 'nanoid'
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { sendEmailVerificationLink } from '../../services/EmailServices'
@@ -16,15 +15,14 @@ import AuthenticationServices from '../../services/AuthenticationServices'
 import AuthenticationError from '../../exceptions/AuthenticationError'
 
 import OauthServices from '../../services/OauthServices'
+import config from '../../config/EnvConfig'
 
-dotenv.config({ path: '.env' })
 const params = new URLSearchParams()
 const router = express.Router()
 const upload = multer()
 const userServices = new UserServices()
 const oauthServices = new OauthServices()
 const auth = getAuth(app)
-
 
 router.post('/register', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
@@ -47,7 +45,7 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
       displayName: username,
       email,
       password,
-      photoURL: `${process.env.GS_URL}/User/profil.jpg`,
+      photoURL: `${config.GS_URL}/User/profil.jpg`,
       disabled: false
     })
     // await admin.auth().createUser({
@@ -119,26 +117,74 @@ router.get('/oauth', async (req: Request, res: Response, next: NextFunction) => 
   }
 })
 
+// router.get('/google/callback', async (req: Request, res: Response, next: NextFunction) => {
+//   const { code } = req.query
+//   console.log(code)
+//   const oAuth2Client = oauthServices._client
+//   const { tokens } = await oAuth2Client.getToken(code)
+//   oAuth2Client.setCredentials(tokens)
+//   const userData = await oauthServices.getUserData(oAuth2Client)
+//   // const redirectUri = `circloapp://auth/callback?credential=${tokens.id_token}&refreshToken=${tokens.refresh_token}`
+//   // const redirectUri = `https://23ee-103-3-222-110.ngrok-free.app/?credential=${tokens.id_token}&refreshToken=${tokens.refresh_token}`
+
+//   // res.redirect(redirectUri)
+//   res.status(200).send({
+//     status: 'success',
+//     message: 'Masuk Berhasil',
+//     data: {
+//       token: {
+//         credential: tokens.id_token,
+//         accessToken: tokens.access_token,
+//         refreshToken: tokens.refresh_token
+//       },
+//       userData: {
+//         name: userData.given_name,
+//         email: userData.email,
+//         image: userData.picture
+//       }
+//     }
+//   })
+// })
 router.get('/google/callback', async (req: Request, res: Response, next: NextFunction) => {
-  const { code } = req.query
-  const oAuth2Client = await oauthServices._client
-  const { tokens } = await oAuth2Client.getToken(code)
+  const { code }: { code?: string } = req.query || {}
+  if (code) {
+    try {
+      const oAuth2Client = oauthServices._client
+
+      // Retrieve tokens using the authorization code
+      const { tokens } = await oAuth2Client.getToken(code)
+
+      // Set credentials with the obtained tokens
+      oAuth2Client.setCredentials(tokens)
+
+      // Construct the redirect URI with tokens
+      // const redirectUri = `circloapp://auth/callback?credential=${encodeURIComponent(tokens.id_token)}&refreshToken=${encodeURIComponent(tokens.refresh_token)}`
+      const redirectUri = `http://localhost:5000/?credential=${encodeURIComponent(tokens.id_token)}&refreshToken=${encodeURIComponent(tokens.refresh_token)}`
+      // Redirect to the custom URI scheme URL
+      res.redirect(redirectUri)
+    } catch (error) {
+      console.error('Error during OAuth callback:', error)
+      next(error)
+    }
+  } else {
+    // Handle case where 'code' is missing or undefined
+    const errorMessage = 'Authorization code (code) is missing or invalid'
+    console.error(errorMessage)
+    res.status(500).send({ error: errorMessage })
+  }
+})
+
+router.get('/oauth/token', async (req: Request, res: Response, next: NextFunction) => {
+  const { authCode } = req.query
+  const oAuth2Client = oauthServices._client
+  const { tokens } = await oAuth2Client.getToken(authCode)
   oAuth2Client.setCredentials(tokens)
-  const userData = await oauthServices.getUserData(oAuth2Client)
   res.status(200).send({
     status: 'success',
-    message: 'Masuk Berhasil',
+    message: 'Get Token Success',
     data: {
-      token: {
-        credential: tokens.id_token,
-        accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token
-      },
-      userData: {
-        name: userData.given_name,
-        email: userData.email,
-        image: userData.picture
-      }
+      credential: tokens.id_token,
+      refresh_token: tokens.refresh_token,
     }
   })
 })
@@ -156,7 +202,7 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
     const signInResponse = await signInWithEmailAndPassword(auth, user.email, user.password)
     const credential = await signInResponse.user.getIdToken(true)
     const refreshToken = signInResponse.user.refreshToken
-    await userServices.updateFcmToken(user.fcmToken, user.email)
+    // await userServices.updateFcmToken(user.fcmToken, user.email)
     res.status(200).send({
       status: 'success',
       message: 'Masuk Berhasil',
@@ -197,7 +243,7 @@ router.post('/refresh-token', async (req: Request, res: Response, next: NextFunc
     params.append('grant_type', 'refresh_token')
     params.append('refresh_token', refreshToken)
 
-    const refreshingToken = await axios.post(`https://securetoken.googleapis.com/v1/token?key=${process.env.API_KEY}`, params, {
+    const refreshingToken = await axios.post(`https://securetoken.googleapis.com/v1/token?key=${config.API_KEY}`, params, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
