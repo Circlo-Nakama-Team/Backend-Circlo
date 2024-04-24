@@ -7,10 +7,10 @@ import config from './EnvConfig'
 //   password: process.env.PASS_DB,
 //   database: process.env.DATABASE
 // }
-const dbConfig: DbConfigTypes = {
-  host: config.HOST_DB ? config.HOST_DB : '34.101.218.217',
-  user: config.USER_DB ? config.USER_DB : 'root',
-  password: config.PASS_DB ? config.PASS_DB : 'Rebirth07',
+const dbConfig = {
+  host: config.HOST_DB,
+  user: config.USER_DB,
+  password: config.PASS_DB,
   database: config.DATABASE,
 }
 
