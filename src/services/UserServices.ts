@@ -19,9 +19,10 @@ export default class UserServices {
 
   async addUser (data: PostUserType): Promise<string | any> {
     try {
-      console.log(data)
-      const query = 'INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-      const values = [data.id, data.firstname, data.lastname, data.username, data.email, data.point, null, null]
+      const lastname = data.lastname ? data.lastname : null
+
+      const query = 'INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)'
+      const values = [data.id, data.firstname, lastname, data.username, data.email, data.point, null]
 
       await this._pool.execute(query, values)
     } catch (error) {
@@ -61,8 +62,7 @@ export default class UserServices {
     const values = [email]
 
     const [queryResult] = await this._pool.execute(userQuery, values)
-    console.log(queryResult[0].USERID)
-    if (!queryResult[0].USERID) return null
+    if (queryResult.length === 0) return null
     return queryResult[0].USERID
   }
 
@@ -96,6 +96,20 @@ export default class UserServices {
 
       const [queryResult] = await this._pool.execute(query, queryValues)
       return queryResult[0]
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  }
+
+  async updateUserPoint (id: string, point: number): Promise<void> {
+    try {
+      const currentPoint = await this.getUserPoint(id)
+      console.log(typeof point)
+      const newPoint = currentPoint + point
+      const query = 'UPDATE user SET POINT = ? WHERE USERID = ?'
+      const values = [newPoint, id]
+      await this._pool.execute(query, values)
     } catch (error) {
       console.error(error)
       throw error
@@ -195,7 +209,6 @@ export default class UserServices {
       if (queryResult.length === 0) throw new NotFoundError('User Address Not Found!')
 
       const formattedQueryResult = queryResult.map(mapDBToModelUserAddress)
-      console.log(queryResult)
       return formattedQueryResult
     } catch (error) {
       console.log(error)
@@ -213,22 +226,47 @@ export default class UserServices {
     }
   }
 
-  async updateFcmToken (id: string, fcmToken: string): Promise<void> {
+  async addFcmToken (idFcmToken: string, id: string, fcmToken: string): Promise<void> {
     try {
-      const query = 'UPDATE user SET FCM_TOKEN = ? WHERE USERID = ?'
-      const values = [fcmToken, id]
+      const query = 'INSERT INTO fcm_token VALUES (?, ?, ?)'
+      const values = [idFcmToken, id, fcmToken]
       await this._pool.execute(query, values)
     } catch (error) {
       throw error
     }
   }
 
-  async getFcmToken (id: string): Promise<string> {
+  async checkFcmTokenExist (id: string): Promise<boolean> {
     try {
-      const query = 'SELECT FCM_TOKEN FROM user WHERE USERID = ?'
+      const query = 'SELECT TOKEN FROM fcm_token WHERE USERID = ?'
       const values = [id]
       const [queryResult] = await this._pool.execute(query, values)
-      return queryResult[0].FCM_TOKEN
+      if (queryResult.length === 0) return false
+      return true
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async getFcmToken (id: string): Promise<any> {
+    try {
+      const query = 'SELECT TOKEN FROM fcm_token WHERE USERID = ?'
+      const values = [id]
+      const [queryResult] = await this._pool.execute(query, values)
+      if (queryResult.length === 0) throw new NotFoundError('User FCM Token Not Found!')
+      return queryResult
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async getUserPoint (id: string): Promise<any> {
+    try {
+      const query = 'SELECT POINT FROM user WHERE USERID = ?'
+      const values = [id]
+      const [queryResult] = await this._pool.execute(query, values)
+      const numPoint = Number(queryResult[0].POINT)
+      return numPoint
     } catch (error) {
       throw error
     }

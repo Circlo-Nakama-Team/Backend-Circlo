@@ -134,4 +134,27 @@ export default class DonateServices {
       throw error
     }
   }
+
+  async updateDonateStatus (id: string, status: string): Promise<void> {
+    try {
+      const query = 'UPDATE donate SET DONATE_STATUS = ? WHERE DONATEID = ?'
+      const values = [status, id]
+      await this._pool.execute(query, values)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  async getUserIdByDonateId (id: string): Promise<any> {
+    try {
+      const query = 'SELECT USERID FROM donate WHERE DONATEID = ?'
+      const values = [id]
+      const [queryResult] = await this._pool.execute(query, values)
+      return queryResult[0].USERID
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
 }

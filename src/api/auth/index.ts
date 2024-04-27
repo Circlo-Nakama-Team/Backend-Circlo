@@ -29,7 +29,7 @@ const auth = getAuth(app)
 router.post('/register', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     UsersValidator.validateUserRegisterPayload(req.body)
-    const { firstname, lastname, username, email, password }: CreateUserRequestBodyType = req.body
+    const { firstname, lastname, username, email, password, fcmToken }: CreateUserRequestBodyType = req.body
     const id = `user-${nanoid(10)}`
     const userData: PostUserType = {
       id,
@@ -65,7 +65,8 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
     //   })
     // })
     await userServices.addUser(userData)
-
+    const idFcmToken = `fcm-${nanoid(10)}`
+    await userServices.addFcmToken(idFcmToken, userData.id, fcmToken)
     res.status(201).send({
       status: 'Success',
       message: 'Success Add User',
@@ -84,14 +85,22 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
 })
 
 router.post('/register-google', async (req: Request, res: Response, next: NextFunction) => {
-  try { 
+  try {
     const isUserExist = await userServices.getUserIdByEmail(req.body.email)
-    if (isUserExist) throw new ClientError('User Already Exist')
-    console.log('haloo')
     UsersValidator.validateUserRegisterGooglePayload(req.body)
-    console.log('haloo12')
     const { uid } = await admin.auth().getUserByEmail(req.body.email)
-    console.log(uid)
+    const idFcmToken = `fcm-${nanoid(10)}`
+    if (isUserExist) {
+      const userFcmTokens = await userServices.getFcmToken(uid)
+      const isUserFcmTokenExist = userFcmTokens.some((token: any) => token.TOKEN === req.body.fcmToken)
+
+      if (!isUserFcmTokenExist) {
+        await userServices.addFcmToken(idFcmToken, uid, req.body.fcmToken)
+      }
+
+      throw new ClientError('User Already Exist')
+    }
+    await userServices.addFcmToken(idFcmToken, uid, req.body.fcmToken)
     const userData: PostUserType = {
       id: uid,
       firstname: req.body.firstname,
@@ -193,9 +202,17 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
     // const isEmailVerified = await admin.auth().getUserByEmail(user.email)
     // console.log(isEmailVerified)
     const signInResponse = await signInWithEmailAndPassword(auth, user.email, user.password)
+    const { uid } = signInResponse.user
     const credential = await signInResponse.user.getIdToken(true)
     const refreshToken = signInResponse.user.refreshToken
-    // await userServices.updateFcmToken(user.fcmToken, user.email)
+
+    const userFcmTokens = await userServices.getFcmToken(uid)
+    const isUserFcmTokenExist = userFcmTokens.some((token: any) => token.TOKEN === req.body.fcmToken)
+
+    if (!isUserFcmTokenExist) {
+      const idFcmToken = `fcm-${nanoid(10)}`
+      await userServices.addFcmToken(idFcmToken, uid, req.body.fcmToken)
+    }
     res.status(200).send({
       status: 'success',
       message: 'Masuk Berhasil',

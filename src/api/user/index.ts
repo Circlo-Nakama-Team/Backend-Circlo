@@ -149,7 +149,7 @@ router.delete('/profile/address/:addressId', async (req: Request, res: Response,
   }
 })
 
-router.post('/fcm-token', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+router.put('/fcm-token', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     const credential: string | undefined = req.headers.authorization
     if (!credential) throw new AuthenticationError('Authorization Header Required')
@@ -158,6 +158,20 @@ router.post('/fcm-token', async (req: Request, res: Response, next: NextFunction
     res.status(200).json({
       status: 'Success',
       message: 'Success Update FCM Token'
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.put('/point', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const credential: string | undefined = req.headers.authorization
+    if (!credential) throw new AuthenticationError('Authorization Header Required')
+    await handler.updatePoint(credential, req.body)
+    res.status(200).json({
+      status: 'Success',
+      message: 'Success Update User Point'
     })
   } catch (error) {
     next(error)

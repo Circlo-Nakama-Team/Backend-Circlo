@@ -1,4 +1,6 @@
+import { type } from 'os'
 import authorize from '../../services/AuthorizationServices'
+import InvariantError from '../../exceptions/InvariantError'
 
 export default class UserHandler {
   _service: any
@@ -116,6 +118,20 @@ export default class UserHandler {
       const decodedToken = await authorize(credential)
       const { uid: id }: any = decodedToken
       await this._service.updateFcmToken(id, fcmToken)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  async updatePoint (credential: string, payload: any): Promise<void> {
+    try {
+      this._validator.validateUserUpdatePointPayload(payload)
+      const { point } = payload
+      if (typeof point === 'string') throw new InvariantError('Point must be a number')
+      const decodedToken = await authorize(credential)
+      const { uid: id }: any = decodedToken
+      await this._service.updateUserPoint(id, point)
     } catch (error) {
       console.log(error)
       throw error

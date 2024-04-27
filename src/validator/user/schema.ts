@@ -5,18 +5,20 @@ const UserRegisterPayloadSchema = Joi.object({
   lastname: Joi.string(),
   username: Joi.string().required(),
   email: Joi.string().email().required(),
-  password: Joi.string().required()
+  password: Joi.string().required(),
+  fcmToken: Joi.string().required()
 })
 const UserRegisterGooglePayloadSchema = Joi.object({
   firstname: Joi.string().required(),
   lastname: Joi.string(),
   username: Joi.string().required(),
-  email: Joi.string().email().required()
+  email: Joi.string().email().required(),
+  fcmToken: Joi.string().required()
 })
 const UserLoginPayloadSchema = Joi.object({
   email: Joi.string().email().required(),
-  password: Joi.string().required()
-  // fcmToken: Joi.string().required()
+  password: Joi.string().required(),
+  fcmToken: Joi.string().required()
 })
 const UserUpdatePayloadSchema = Joi.object({
   username: Joi.string(),
@@ -35,4 +37,9 @@ const UpdateUserAddressPayloadSchema = Joi.object({
   detail_address: Joi.string(),
   addressTitle: Joi.string()
 })
-export { UserRegisterPayloadSchema, UserUpdatePayloadSchema, UserLoginPayloadSchema, UserAddressPayloadSchema, UserRegisterGooglePayloadSchema, UpdateUserAddressPayloadSchema }
+
+const updateUserPointPayloadSchema = Joi.object({
+  point: Joi.number().required()
+})
+
+export { UserRegisterPayloadSchema, UserUpdatePayloadSchema, UserLoginPayloadSchema, UserAddressPayloadSchema, UserRegisterGooglePayloadSchema, UpdateUserAddressPayloadSchema, updateUserPointPayloadSchema }

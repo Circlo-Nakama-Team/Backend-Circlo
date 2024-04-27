@@ -4,6 +4,7 @@ export interface CreateUserRequestBodyType {
   username: string
   email: string
   password: string
+  fcmToken: string
 }
 
 export interface CreateUserGoogleRequestBodyType {

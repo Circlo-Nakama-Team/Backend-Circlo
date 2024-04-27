@@ -87,4 +87,13 @@ export default class DonateHandler {
       throw error
     }
   }
+
+  async updateDonateStatusHandler (id: string, status: string): Promise<void> {
+    try {
+      await this._service.updateDonateStatus(id, status)
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
 }
