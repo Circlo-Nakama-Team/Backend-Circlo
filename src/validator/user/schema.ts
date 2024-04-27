@@ -8,7 +8,6 @@ const UserRegisterPayloadSchema = Joi.object({
   password: Joi.string().required()
 })
 const UserRegisterGooglePayloadSchema = Joi.object({
-  userId: Joi.string().required(),
   firstname: Joi.string().required(),
   lastname: Joi.string(),
   username: Joi.string().required(),

@@ -16,12 +16,14 @@ import AuthenticationError from '../../exceptions/AuthenticationError'
 
 import OauthServices from '../../services/OauthServices'
 import config from '../../config/EnvConfig'
+import ClientError from '../../exceptions/ClientError'
 
 const params = new URLSearchParams()
 const router = express.Router()
 const upload = multer()
 const userServices = new UserServices()
 const oauthServices = new OauthServices()
+const Oauth2Client = oauthServices._client
 const auth = getAuth(app)
 
 router.post('/register', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
@@ -81,31 +83,37 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
   }
 })
 
-// router.post('/register-google', async (req: Request, res: Response, next: NextFunction) => {
-//   try {
-//     UsersValidator.validateUserRegisterGooglePayload(req.body)
-//     const userData: PostUserType = {
-//       id: req.body.userId,
-//       firstname: req.body.firstname,
-//       lastname: req.body.lastname || null,
-//       username: req.body.username,
-//       email: req.body.email,
-//       point: 0
-//     }
-//     await userServices.addUser(userData)
+router.post('/register-google', async (req: Request, res: Response, next: NextFunction) => {
+  try { 
+    const isUserExist = await userServices.getUserIdByEmail(req.body.email)
+    if (isUserExist) throw new ClientError('User Already Exist')
+    console.log('haloo')
+    UsersValidator.validateUserRegisterGooglePayload(req.body)
+    console.log('haloo12')
+    const { uid } = await admin.auth().getUserByEmail(req.body.email)
+    console.log(uid)
+    const userData: PostUserType = {
+      id: uid,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname || null,
+      username: req.body.username,
+      email: req.body.email,
+      point: 0
+    }
+    await userServices.addUser(userData)
 
-//     res.status(201).send({
-//       status: 'Success',
-//       message: 'Success Add User',
-//       data: {
-//         userId: req.body.userId
-//       }
-//     })
-//   } catch (error) {
-//     console.log(error)
-//     next(error)
-//   }
-// })
+    res.status(201).send({
+      status: 'Success',
+      message: 'Success Add User',
+      data: {
+        userId: userData.id
+      }
+    })
+  } catch (error) {
+    console.log(error)
+    next(error)
+  }
+})
 
 router.get('/oauth', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -174,21 +182,6 @@ router.get('/google/callback', async (req: Request, res: Response, next: NextFun
   }
 })
 
-router.get('/oauth/token', async (req: Request, res: Response, next: NextFunction) => {
-  const { authCode } = req.query
-  const oAuth2Client = oauthServices._client
-  const { tokens } = await oAuth2Client.getToken(authCode)
-  oAuth2Client.setCredentials(tokens)
-  res.status(200).send({
-    status: 'success',
-    message: 'Get Token Success',
-    data: {
-      credential: tokens.id_token,
-      refresh_token: tokens.refresh_token,
-    }
-  })
-})
-
 router.post('/login', async (req: Request, res: Response, next: NextFunction) => {
   try {
     UsersValidator.validateUserLoginPayload(req.body)
@@ -218,21 +211,22 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
 })
 
 router.post('/logout', async (req: Request, res: Response, next: NextFunction) => {
+  const token: string | undefined = req.headers.authorization
+  if (!token) throw new AuthenticationError('Request Missing Auth Header')
+
+  const decodedToken = await AuthenticationServices(token)
+  const { uid: userId } = decodedToken
   try {
-    const token: string | undefined = req.headers.authorization
-    if (!token) throw new AuthenticationError('Request Missing Auth Header')
-
-    const decodedToken = await AuthenticationServices(token)
-    const { uid: userId } = decodedToken
-
+    await admin.auth().revokeRefreshTokens(userId)
+    res.status(200).json({ status: 'success', message: 'Logout Berhasil' })
+  } catch (error) {
     try {
-      await admin.auth().revokeRefreshTokens(userId)
-      res.status(200).json({ status: 'success', message: 'Logout Berhasil' })
+      await Oauth2Client.revokeToken(token)
+    //   oAuth2Client.revokeToken(a.refresh_token);
+    // oAuth2Client.revokeCredentials();
     } catch (error) {
       next(error)
     }
-  } catch (error) {
-    next(error)
   }
 })
 

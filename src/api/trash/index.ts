@@ -67,4 +67,34 @@ router.post('/ideas', upload.single('image'), async (req: Request, res: Response
   }
 })
 
+router.get('/explorer', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const trashData = await handler.getTrashExplorer()
+    res.status(200).json({
+      status: 'Success',
+      message: 'Success Get Trash Explorer',
+      data: {
+        trashData
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.get('/game', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const { questions } = await handler.getTrashQuestions()
+    res.status(200).json({
+      status: 'Success',
+      message: 'Success Get Trash Explorer',
+      data: {
+        questions
+      }
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
 export default router

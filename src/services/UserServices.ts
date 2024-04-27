@@ -19,6 +19,7 @@ export default class UserServices {
 
   async addUser (data: PostUserType): Promise<string | any> {
     try {
+      console.log(data)
       const query = 'INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
       const values = [data.id, data.firstname, data.lastname, data.username, data.email, data.point, null, null]
 
@@ -55,12 +56,13 @@ export default class UserServices {
     }
   }
 
-  async getUserIdByEmail (email: string): Promise<string> {
+  async getUserIdByEmail (email: string): Promise<any> {
     const userQuery = 'SELECT USERID FROM user WHERE EMAIL = ?'
     const values = [email]
 
     const [queryResult] = await this._pool.execute(userQuery, values)
-    console.log(queryResult)
+    console.log(queryResult[0].USERID)
+    if (!queryResult[0].USERID) return null
     return queryResult[0].USERID
   }
 

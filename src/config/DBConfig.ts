@@ -10,7 +10,7 @@ import config from './EnvConfig'
 const dbConfig = {
   host: config.HOST_DB,
   user: config.USER_DB,
-  password: config.PASS_DB,
+  // password: config.PASS_DB,
   database: config.DATABASE,
 }
 

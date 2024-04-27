@@ -1,8 +1,8 @@
 // import { GoogleAuthProvider, getAuth, signInWithRedirect, getRedirectResult } from 'firebase/auth'
 import { google } from 'googleapis'
 import config from '../config/EnvConfig'
-const {OAuth2Client} = require('google-auth-library');
-
+import { OAuth2Client } from 'google-auth-library'
+import AuthorizationError from '../exceptions/AuthorizationError'
 export default class OauthServices {
   _scope: string[]
   _client: any
@@ -46,10 +46,9 @@ export default class OauthServices {
         audience: process.env.CLIENT_ID, // Ensure this matches your OAuth client ID
       });
       const payload = ticket.getPayload();
-      console.log('Token Payload:', payload);
       return payload;
     } catch (error) {
-      throw new Error('Invalid token');
+      throw new AuthorizationError('Invalid token');
     }
   }
   

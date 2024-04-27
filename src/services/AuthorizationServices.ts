@@ -8,6 +8,7 @@ const userServices = new UserServices()
 
 const authorize = async (credential: string): Promise<any> => {
   const checkRevoked = true
+  if (!credential) throw new AuthorizationError('Unathorized Request. Please pass Auth header')
   const token = credential.split(' ')[1]
   console.log(token)
   try {
@@ -15,15 +16,13 @@ const authorize = async (credential: string): Promise<any> => {
     return decodedToken
   } catch (error) {
     try {
-      const { payload } = await oauthServices.validateToken(token)
-      const { email } = payload
+      const { email } = await oauthServices.validateToken(token)
       console.log(email)
       const userId = await userServices.getUserIdByEmail(email)
-      console.log(userId)
       return { uid: userId }
     } catch (error) {
       console.log(error)
-      throw new AuthorizationError('Unauthorized Request')
+      throw new AuthorizationError('Unauthorized Request. Your Token Invalid')
     }
   }
 }

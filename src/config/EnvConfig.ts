@@ -24,7 +24,9 @@ const config = {
 
   CLIENT_ID: process.env.CLIENT_ID,
   CLIENT_SECRET: process.env.CLIENT_SECRET,
-  REDIRECT_URL: process.env.REDIRECT_URL
+  REDIRECT_URL: process.env.REDIRECT_URL,
+
+  AI_KEY: process.env.AI_KEY
 }
 
 export default config

@@ -1,10 +1,14 @@
 import db from '../config/DBConfig'
 import { mapDBModelTrashCategories } from '../utils/mapping/trash'
 import NotFoundError from '../exceptions/NotFoundError'
-export default class DonateServices {
+import { GoogleGenerativeAI } from '@google/generative-ai'
+import config from '../config/EnvConfig'
+export default class TrashServices {
   _pool: any
+  _AIClient: any
   constructor () {
     this._pool = db
+    this._AIClient = new GoogleGenerativeAI(config.AI_KEY ? config.AI_KEY : '')
   }
 
   async getTrashList (): Promise<any> {
@@ -65,6 +69,39 @@ export default class DonateServices {
         }))
       }
       return result
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  async getTrashExplorer (): Promise<any> {
+    try {
+      const model = this._AIClient.getGenerativeModel({ model: 'gemini-pro' })
+      const prompt = `Can you provide informations of crafts that made 
+      from some waste and its accessible product image url,give information about how much potential price in markets if 
+      we sell it and how to make it?. Don't hallusinate, just give information based on data you have`
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const text = response.text()
+      return text
+    } catch (error) {
+      console.log(error)
+      throw error
+    }
+  }
+
+  async getTrashQuestions (): Promise<any> {
+    try {
+      const model = this._AIClient.getGenerativeModel({ model: 'gemini-pro' })
+      const prompt = `Can you provide 3 Questions about trash with 4 possible answers, provide the correct answer and give the explanation?.
+      provide my request with json format.`
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const text = response.text()
+      return text
     } catch (error) {
       console.log(error)
       throw error
