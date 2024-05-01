@@ -1,12 +1,8 @@
 import express, { type Express, type Request, type Response, type NextFunction } from 'express'
-import dotenv from 'dotenv'
-import session from 'express-session'
-import MySQLStore from 'express-mysql-session'
 import config from './config/EnvConfig'
 
-dotenv.config({ path: '.env' })
 import path from 'path'
-import cookieParser from 'cookie-parser';
+import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import UserAPI from './api/user'
 import AuthAPI from './api/auth'

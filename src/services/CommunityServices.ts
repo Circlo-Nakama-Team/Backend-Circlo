@@ -1,6 +1,6 @@
 import db from '../config/DBConfig'
 import { type UserPostType } from '../utils/types/CommunityTypes'
-import { mapDBToModel } from '../utils/mapping/community'
+import { mapDBToModel, mapDBToModelGetPosts } from '../utils/mapping/community'
 import UploadServices from './UploadServices'
 import NotFoundError from '../exceptions/NotFoundError'
 
@@ -15,12 +15,13 @@ export default class CommunityServices {
 
   async getPosts (): Promise<any> {
     try {
-      const query = `SELECT * FROM post
-      ORDER BY POST_TIME DESC`
+      const query = `SELECT post.POST_ID, post.USERID, user.USERNAME, post.POST_BODY, post.POST_TIME, post.POST_LIKES, post.POST_IMAGE
+      FROM post
+      INNER JOIN user ON user.USERID = post.USERID
+      ORDER BY post.POST_TIME DESC`
       const [queryResult] = await this._pool.execute(query)
       if (queryResult.length === 0) throw new NotFoundError('Post not found')
-      const formattedResult = queryResult.map(mapDBToModel)
-      console.log(queryResult)
+      const formattedResult = queryResult.map(mapDBToModelGetPosts)
       return formattedResult
     } catch (error) {
       console.error(error)

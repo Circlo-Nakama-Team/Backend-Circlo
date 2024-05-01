@@ -2,7 +2,7 @@ import express, { type Request, type Response, type NextFunction } from 'express
 import multer from 'multer'
 import { nanoid } from 'nanoid'
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
-import { sendEmailVerificationLink } from '../../services/EmailServices'
+import { sendEmailVerificationLink, sendPasswordResetLink } from '../../services/EmailServices'
 import axios from 'axios'
 
 import UserServices from '../../services/UserServices'
@@ -17,6 +17,7 @@ import AuthenticationError from '../../exceptions/AuthenticationError'
 import OauthServices from '../../services/OauthServices'
 import config from '../../config/EnvConfig'
 import ClientError from '../../exceptions/ClientError'
+import NotFoundError from '../../exceptions/NotFoundError'
 
 const params = new URLSearchParams()
 const router = express.Router()
@@ -48,22 +49,23 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
       email,
       password,
       photoURL: `${config.GS_URL}/User/profil.jpg`,
-      disabled: false
+      disabled: false,
+      emailVerified: false
     })
-    // await admin.auth().createUser({
-    //   uid: id,
-    //   displayName: username,
-    //   email,
-    //   password,
-    //   photoURL: `${process.env.GS_URL}/User/profil.jpg`,
-    //   disabled: true
-    // }).then(async (userRecord: any): Promise<any> => {
-    //   console.log(userRecord)
-    //   await admin.auth().generateEmailVerificationLink(userRecord.email, actionCodeSettings).then(async (link): Promise<any> => {
-    //     console.log(link)
-    //     await sendEmailVerificationLink(userRecord.email, userRecord.displayName, link)
-    //   })
-    // })
+    const actionCodeSettings = {
+      url: 'http://localhost:5000/',
+      handleCodeInApp: true,
+      // android: {
+      //   packageName: 'com.nakama.circlo',
+      //   installApp: true,
+      //   minimumVersion: '8'
+      // },
+      // dynamicLinkDomain: 'https://google.com'
+    }
+
+    const emailVerificationLink: string = await admin.auth().generateEmailVerificationLink(userRecord.email, actionCodeSettings)
+    console.log(emailVerificationLink)
+    await sendEmailVerificationLink(userRecord.email, userRecord.displayName, emailVerificationLink)
     await userServices.addUser(userData)
     const idFcmToken = `fcm-${nanoid(10)}`
     await userServices.addFcmToken(idFcmToken, userData.id, fcmToken)
@@ -260,6 +262,35 @@ router.post('/refresh-token', async (req: Request, res: Response, next: NextFunc
       }
     })
     res.status(201).json({ status: 'Success', message: 'Refreshing Access Token Success', credential: refreshingToken.data.access_token })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.post('/forget-password', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email } = req.body
+    console.log(email)
+    const actionCodeSettings = {
+      url: 'http://localhost:5000/',
+      handleCodeInApp: true,
+      android: {
+        packageName: 'com.nakama.circlo',
+        installApp: true,
+        minimumVersion: '8'
+      }
+      // dynamicLinkDomain: 'circlo-635bd.firebaseapp.com'
+    }
+
+    const resetPassLink: string = await admin.auth().generatePasswordResetLink(email, actionCodeSettings)
+    console.log(resetPassLink)
+    const { displayName } = await admin.auth().getUserByEmail(req.body.email)
+    console.log(displayName)
+    if (!displayName) {
+      throw new NotFoundError('User not found')
+    }
+    await sendPasswordResetLink(email, displayName, resetPassLink)
+    res.status(200).json({ status: 'Success', message: 'Please Check Your Email To Reset Password' })
   } catch (error) {
     next(error)
   }
