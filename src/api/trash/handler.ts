@@ -20,7 +20,6 @@ export default class TrashHandler {
       const trashData = await this._service.getTrashList()
       return trashData
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -30,7 +29,6 @@ export default class TrashHandler {
       const trashData = await this._service.getTrashCategoriesList()
       return trashData
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -91,7 +89,6 @@ export default class TrashHandler {
       }))
       return formattedArray
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -101,7 +98,6 @@ export default class TrashHandler {
       const trashData = await this._service.getTrashExplorer()
       return trashData
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -111,10 +107,8 @@ export default class TrashHandler {
       const questionsData = await this._service.getTrashQuestions()
       const formattedData = questionsData.replaceAll(/`/g, '').replace(/json/g, '')
       const formattedQuestion = JSON.parse(formattedData)
-      console.log(formattedQuestion)
       return formattedQuestion
     } catch (error) {
-      console.log(error)
       throw error
     }
   }

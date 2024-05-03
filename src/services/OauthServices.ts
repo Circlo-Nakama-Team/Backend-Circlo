@@ -35,7 +35,6 @@ export default class OauthServices {
 
   async getUserData (oauthClient: any): Promise<any> {
     const { data: userInfo } = await google.oauth2({ version: 'v2', auth: oauthClient }).userinfo.get()
-    console.log(userInfo)
     return userInfo
   }
   

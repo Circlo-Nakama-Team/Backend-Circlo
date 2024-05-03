@@ -28,8 +28,9 @@ const config = {
 
   AI_KEY: process.env.AI_KEY,
   DEV_EMAIL: process.env.DEV_EMAIL,
-  DEV_PASS: process.env.DEV_PASS
-
+  DEV_PASS: process.env.DEV_PASS,
+  BASE_URL: process.env.BASE_URL,
+  MOBILE_APP_URL: process.env.MOBILE_APP_URL
 }
 
 export default config

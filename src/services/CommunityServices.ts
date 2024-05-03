@@ -3,6 +3,7 @@ import { type UserPostType } from '../utils/types/CommunityTypes'
 import { mapDBToModel, mapDBToModelGetPosts } from '../utils/mapping/community'
 import UploadServices from './UploadServices'
 import NotFoundError from '../exceptions/NotFoundError'
+import admin from '../config/FirebaseAdmin'
 
 const uploadServices = new UploadServices()
 export default class CommunityServices {
@@ -21,10 +22,23 @@ export default class CommunityServices {
       ORDER BY post.POST_TIME DESC`
       const [queryResult] = await this._pool.execute(query)
       if (queryResult.length === 0) throw new NotFoundError('Post not found')
-      const formattedResult = queryResult.map(mapDBToModelGetPosts)
+      const formattedResult = await Promise.all(queryResult.map(async (post: any) => {
+        const { photoURL } = await admin.auth().getUser(post.USERID)
+        return {
+          id: post.POST_ID,
+          user: {
+            userId: post.USERID,
+            username: post.USERNAME,
+            image: photoURL
+          },
+          postBody: post.POST_BODY,
+          postTime: post.POST_TIME,
+          postLikes: post.POST_LIKES,
+          postImage: post.POST_IMAGE
+        }
+      }))
       return formattedResult
     } catch (error) {
-      console.error(error)
       throw error
     }
   }
@@ -37,7 +51,6 @@ export default class CommunityServices {
       const post = postResult.map(mapDBToModel)
       return post
     } catch (error: any) {
-      console.log(error)
       throw error
     }
   }
@@ -50,7 +63,6 @@ export default class CommunityServices {
     try {
       await this._pool.execute(query, values)
     } catch (error) {
-      console.error(error)
       throw error
     }
   }
@@ -61,7 +73,6 @@ export default class CommunityServices {
       const values = [idPost]
       await this._pool.execute(query, values)
     } catch (error) {
-      console.error(error)
       throw error
     }
   }
@@ -72,7 +83,6 @@ export default class CommunityServices {
       const values = [idPost]
       await this._pool.execute(query, values)
     } catch (error) {
-      console.error(error)
       throw error
     }
   }
@@ -86,7 +96,6 @@ export default class CommunityServices {
         throw new NotFoundError('Post Not Found!')
       }
     } catch (error) {
-      console.error(error)
       throw error
     }
   }

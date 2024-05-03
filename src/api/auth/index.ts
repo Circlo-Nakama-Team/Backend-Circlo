@@ -1,5 +1,4 @@
 import express, { type Request, type Response, type NextFunction } from 'express'
-import multer from 'multer'
 import { nanoid } from 'nanoid'
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { sendEmailVerificationLink, sendPasswordResetLink } from '../../services/EmailServices'
@@ -21,7 +20,6 @@ import NotFoundError from '../../exceptions/NotFoundError'
 
 const params = new URLSearchParams()
 const router = express.Router()
-const upload = multer()
 const userServices = new UserServices()
 const oauthServices = new OauthServices()
 const Oauth2Client = oauthServices._client
@@ -30,7 +28,7 @@ const auth = getAuth(app)
 router.post('/register', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
   try {
     UsersValidator.validateUserRegisterPayload(req.body)
-    const { firstname, lastname, username, email, password, fcmToken }: CreateUserRequestBodyType = req.body
+    const { firstname, lastname, username, email, password }: CreateUserRequestBodyType = req.body
     const id = `user-${nanoid(10)}`
     const userData: PostUserType = {
       id,
@@ -40,9 +38,6 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
       email,
       point: 0
     }
-    // const userRecord = await createUserWithEmailAndPassword(auth, email, password)
-    // console.log(userRecord.user)
-    // await sendEmailVerification(userRecord.user)
     const userRecord: any = await admin.auth().createUser({
       uid: id,
       displayName: username,
@@ -53,35 +48,19 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
       emailVerified: false
     })
     const actionCodeSettings = {
-      url: 'http://localhost:5000/',
-      handleCodeInApp: true,
-      // android: {
-      //   packageName: 'com.nakama.circlo',
-      //   installApp: true,
-      //   minimumVersion: '8'
-      // },
-      // dynamicLinkDomain: 'https://google.com'
+      url: `${config.BASE_URL}/auth/redirect`,
+      handleCodeInApp: true
     }
 
     const emailVerificationLink: string = await admin.auth().generateEmailVerificationLink(userRecord.email, actionCodeSettings)
-    console.log(emailVerificationLink)
     await sendEmailVerificationLink(userRecord.email, userRecord.displayName, emailVerificationLink)
     await userServices.addUser(userData)
-    const idFcmToken = `fcm-${nanoid(10)}`
-    await userServices.addFcmToken(idFcmToken, userData.id, fcmToken)
+
     res.status(201).send({
       status: 'Success',
-      message: 'Success Add User',
-      data: {
-        userId: userRecord.uid
-      }
+      message: 'Please verify your email before login, The link has been sent to your email'
     })
-    // res.status(201).send({
-    //   status: 'Success',
-    //   message: 'Please verify your email, The link has been sent to your email'
-    // })
   } catch (error: any) {
-    console.log(error)
     next(error)
   }
 })
@@ -121,7 +100,6 @@ router.post('/register-google', async (req: Request, res: Response, next: NextFu
       }
     })
   } catch (error) {
-    console.log(error)
     next(error)
   }
 })
@@ -131,7 +109,6 @@ router.get('/oauth', async (req: Request, res: Response, next: NextFunction) => 
     const authUrl = await oauthServices.getAuthUrl()
     res.redirect(authUrl)
   } catch (error) {
-    console.log(error)
     next(error)
   }
 })
@@ -182,13 +159,11 @@ router.get('/google/callback', async (req: Request, res: Response, next: NextFun
       // Redirect to the custom URI scheme URL
       res.redirect(redirectUri)
     } catch (error) {
-      console.error('Error during OAuth callback:', error)
       next(error)
     }
   } else {
     // Handle case where 'code' is missing or undefined
     const errorMessage = 'Authorization code (code) is missing or invalid'
-    console.error(errorMessage)
     res.status(500).send({ error: errorMessage })
   }
 })
@@ -201,17 +176,21 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
       password: req.body.password,
       fcmToken: req.body.fcmToken
     }
-    // const isEmailVerified = await admin.auth().getUserByEmail(user.email)
-    // console.log(isEmailVerified)
+    const { emailVerified } = await admin.auth().getUserByEmail(user.email)
+    if (!emailVerified) throw new ClientError('Email Not Verified')
+
     const signInResponse = await signInWithEmailAndPassword(auth, user.email, user.password)
     const { uid } = signInResponse.user
     const credential = await signInResponse.user.getIdToken(true)
     const refreshToken = signInResponse.user.refreshToken
 
-    const userFcmTokens = await userServices.getFcmToken(uid)
-    const isUserFcmTokenExist = userFcmTokens.some((token: any) => token.TOKEN === req.body.fcmToken)
+    let isUserFcmTokenExist
+    const userFcmTokens = await userServices.getFcmToken(uid, 'login')
+    if (userFcmTokens.length > 0) {
+      isUserFcmTokenExist = userFcmTokens.some((token: any) => token.TOKEN === req.body.fcmToken)
+    }
 
-    if (!isUserFcmTokenExist) {
+    if (!isUserFcmTokenExist || userFcmTokens.length === 0) {
       const idFcmToken = `fcm-${nanoid(10)}`
       await userServices.addFcmToken(idFcmToken, uid, req.body.fcmToken)
     }
@@ -224,8 +203,15 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction) =>
       }
     })
   } catch (error: any) {
-    console.log(error)
-    next(error)
+    if (error.code === 'auth/invalid-credential') {
+      // Handle the specific FirebaseError
+      // You can create a custom error message here
+      const customErrorMessage = 'Invalid credentials. Please check your username and password.'
+      // You can also throw a new Error with your custom message if needed
+      next(new ClientError(customErrorMessage))
+    } else {
+      next(error)
+    }
   }
 })
 
@@ -270,22 +256,13 @@ router.post('/refresh-token', async (req: Request, res: Response, next: NextFunc
 router.post('/forget-password', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email } = req.body
-    console.log(email)
     const actionCodeSettings = {
-      url: 'http://localhost:5000/',
-      handleCodeInApp: true,
-      android: {
-        packageName: 'com.nakama.circlo',
-        installApp: true,
-        minimumVersion: '8'
-      }
-      // dynamicLinkDomain: 'circlo-635bd.firebaseapp.com'
+      url: `${config.BASE_URL}/auth/redirect`,
+      handleCodeInApp: true
     }
 
     const resetPassLink: string = await admin.auth().generatePasswordResetLink(email, actionCodeSettings)
-    console.log(resetPassLink)
     const { displayName } = await admin.auth().getUserByEmail(req.body.email)
-    console.log(displayName)
     if (!displayName) {
       throw new NotFoundError('User not found')
     }
@@ -294,6 +271,11 @@ router.post('/forget-password', async (req: Request, res: Response, next: NextFu
   } catch (error) {
     next(error)
   }
+})
+
+router.get('/redirect', async (req: Request, res: Response, next: NextFunction) => {
+  const redirectLink = config.MOBILE_APP_URL ? config.MOBILE_APP_URL : 'circloapp://auth/callback'
+  res.redirect(redirectLink)
 })
 
 export default router

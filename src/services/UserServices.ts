@@ -26,7 +26,6 @@ export default class UserServices {
 
       await this._pool.execute(query, values)
     } catch (error) {
-      console.error(error)
       throw error
     }
   }
@@ -52,7 +51,6 @@ export default class UserServices {
       }
       return userData
     } catch (error) {
-      console.error(error)
       throw error
     }
   }
@@ -97,7 +95,6 @@ export default class UserServices {
       const [queryResult] = await this._pool.execute(query, queryValues)
       return queryResult[0]
     } catch (error) {
-      console.error(error)
       throw error
     }
   }
@@ -105,13 +102,11 @@ export default class UserServices {
   async updateUserPoint (id: string, point: number): Promise<void> {
     try {
       const currentPoint = await this.getUserPoint(id)
-      console.log(typeof point)
       const newPoint = currentPoint + point
       const query = 'UPDATE user SET POINT = ? WHERE USERID = ?'
       const values = [newPoint, id]
       await this._pool.execute(query, values)
     } catch (error) {
-      console.error(error)
       throw error
     }
   }
@@ -127,7 +122,6 @@ export default class UserServices {
       const addressId = await this.verifiedAddressExist(id)
       return addressId
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -155,7 +149,6 @@ export default class UserServices {
       const query = `UPDATE address SET ${queryPropertyString} WHERE USERID = ? AND ADDRESSID = ?`
       await this._pool.execute(query, queryValues)
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -182,7 +175,6 @@ export default class UserServices {
         addressId: queryResult[0].ADDRESSID
       }
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -195,7 +187,6 @@ export default class UserServices {
       const formattedQueryResult = queryResult.map(mapDBToModelUserAddress)
       return formattedQueryResult
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -211,7 +202,6 @@ export default class UserServices {
       const formattedQueryResult = queryResult.map(mapDBToModelUserAddress)
       return formattedQueryResult
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -248,12 +238,12 @@ export default class UserServices {
     }
   }
 
-  async getFcmToken (id: string): Promise<any> {
+  async getFcmToken (id: string, mode?: string): Promise<any> {
     try {
       const query = 'SELECT TOKEN FROM fcm_token WHERE USERID = ?'
       const values = [id]
       const [queryResult] = await this._pool.execute(query, values)
-      if (queryResult.length === 0) throw new NotFoundError('User FCM Token Not Found!')
+      if (queryResult.length === 0 && mode !== 'login') throw new NotFoundError('User FCM Token Not Found!')
       return queryResult
     } catch (error) {
       throw error

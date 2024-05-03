@@ -20,7 +20,6 @@ export default class CommunityHandler {
       const posts = await this._service.getPosts()
       return posts
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -50,7 +49,6 @@ export default class CommunityHandler {
 
       await this._service.addPost(userId, payload)
     } catch (error) {
-      console.log(error)
       throw error
     }
   }

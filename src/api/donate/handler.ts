@@ -33,13 +33,11 @@ export default class DonateHandler {
         const encodedFilename = file.replace(/ /g, '%20')
 
         const link = `${config.GS_URL}/${encodedFilename}`
-        console.log(link)
         this._service.addDonateImage(donateId, imageId, link)
         return
       }))
       return donateId
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -56,7 +54,6 @@ export default class DonateHandler {
       }))
       return fixedDonateData
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -73,7 +70,6 @@ export default class DonateHandler {
       }
       return fixedDonateData
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -83,7 +79,6 @@ export default class DonateHandler {
       const donateData = await this._service.getDonateSchedule()
       return donateData
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -92,7 +87,6 @@ export default class DonateHandler {
     try {
       await this._service.updateDonateStatus(id, status)
     } catch (error) {
-      console.log(error)
       throw error
     }
   }

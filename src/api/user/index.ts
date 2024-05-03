@@ -79,7 +79,6 @@ router.put('/profile', upload.single('image'), async (req: Request, res: Respons
       }
     })
   } catch (error) {
-    console.log(error)
     next(error)
   }
 })

@@ -18,7 +18,6 @@ export default class TrashServices {
       const [result] = await this._pool.execute(query)
       return result
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -30,7 +29,6 @@ export default class TrashServices {
       const formattedResult = await result.map(mapDBModelTrashCategories)
       return formattedResult
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -44,7 +42,6 @@ export default class TrashServices {
       const [result] = await this._pool.execute(query, values)
       return result[0]
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -70,7 +67,6 @@ export default class TrashServices {
       }
       return result
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -94,7 +90,6 @@ export default class TrashServices {
       }
       return result
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -110,7 +105,6 @@ export default class TrashServices {
       const text = response.text()
       return text
     } catch (error) {
-      console.log(error)
       throw error
     }
   }

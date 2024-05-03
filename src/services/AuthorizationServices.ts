@@ -19,7 +19,6 @@ const authorize = async (credential: string): Promise<any> => {
       const userId = await userServices.getUserIdByEmail(email)
       return { uid: userId }
     } catch (error) {
-      console.log(error)
       throw new AuthorizationError('Unauthorized Request. Your Token Invalid')
     }
   }

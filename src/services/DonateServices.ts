@@ -24,7 +24,6 @@ export default class DonateServices {
       await this._pool.execute(query, values)
       return id
     } catch (error) {
-      console.error(error)
       throw error
     }
   }
@@ -46,11 +45,9 @@ export default class DonateServices {
 
       const [queryResult] = await this._pool.execute(query, values)
       if (queryResult.length === 0) throw new NotFoundError('Donate Data not found')
-      console.log(queryResult)
       const formattedDonateData = queryResult.map(mapDBToModelUserDonate)
       return formattedDonateData
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -76,7 +73,6 @@ export default class DonateServices {
       const formattedDonateData = queryResult.map(mapDBToModelUserDonate)
       return formattedDonateData[0]
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -90,7 +86,6 @@ export default class DonateServices {
       const formattedDonateData = queryResult.map(mapDBModelDonateSchedule)
       return formattedDonateData
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -101,7 +96,6 @@ export default class DonateServices {
       const values = [imageId, donateId, link]
       await this._pool.execute(query, values)
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -114,7 +108,6 @@ export default class DonateServices {
       const donateImage = await Promise.all(queryResult.map((image: any) => image.LINK))
       return donateImage
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -130,7 +123,6 @@ export default class DonateServices {
       }
       // return queryResult[0].DONATEID
     } catch (error) {
-      console.error(error)
       throw error
     }
   }
@@ -141,7 +133,6 @@ export default class DonateServices {
       const values = [status, id]
       await this._pool.execute(query, values)
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -153,7 +144,6 @@ export default class DonateServices {
       const [queryResult] = await this._pool.execute(query, values)
       return queryResult[0].USERID
     } catch (error) {
-      console.log(error)
       throw error
     }
   }

@@ -17,7 +17,6 @@ export default class UserHandler {
       const user = await this._service.getUserById(uid)
       return user
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -27,7 +26,6 @@ export default class UserHandler {
       const user = await this._service.getUserById(userId)
       return user
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -43,12 +41,10 @@ export default class UserHandler {
       const { uid: id }: any = decodedToken
       this._validator.validateUserUpdatePayload(payload)
       payload.image = userImage
-      console.log(payload.image)
       await this._service.updateUser(id, payload)
 
       return id
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -61,7 +57,6 @@ export default class UserHandler {
       const addressId = await this._service.addAddressUser(id, payload)
       return addressId
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -71,7 +66,6 @@ export default class UserHandler {
       const address = await this._service.getUserAddressByUserId(id)
       return address
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -83,7 +77,6 @@ export default class UserHandler {
       const address = await this._service.getCertainUserAddress(id, addressId)
       return address
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -96,7 +89,6 @@ export default class UserHandler {
       await this._service.checkUserAddressExist(addressId, id)
       await this._service.updateAddressUser(id, addressId, payload)
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -108,7 +100,6 @@ export default class UserHandler {
       await this._service.checkUserAddressExist(addressId, id)
       await this._service.deleteAddressUser(id, addressId)
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -119,7 +110,6 @@ export default class UserHandler {
       const { uid: id }: any = decodedToken
       await this._service.updateFcmToken(id, fcmToken)
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -133,7 +123,6 @@ export default class UserHandler {
       const { uid: id }: any = decodedToken
       await this._service.updateUserPoint(id, point)
     } catch (error) {
-      console.log(error)
       throw error
     }
   }

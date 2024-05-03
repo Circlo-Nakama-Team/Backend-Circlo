@@ -5,8 +5,7 @@ const UserRegisterPayloadSchema = Joi.object({
   lastname: Joi.string(),
   username: Joi.string().required(),
   email: Joi.string().email().required(),
-  password: Joi.string().required(),
-  fcmToken: Joi.string().required()
+  password: Joi.string().required()
 })
 const UserRegisterGooglePayloadSchema = Joi.object({
   firstname: Joi.string().required(),
