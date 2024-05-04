@@ -11,7 +11,7 @@ The Backend-Circlo repository focuses on creating a REST API that will be used b
 6. Save the credentials in the root folder
 7. Adjust the storageConfig file with the newly created service account
 8. Create a bucket in Google Cloud Storage and create Post, Predict, Trash, User, Donate and Ideas folders.
-9. create a database named "hackfest" in phpmyadmin
+9. create a database named "gsc" in phpmyadmin
 10. import sql file
 11. Adjust DbConfig to the database that has been created
 12. Deploy ML from ML repo
@@ -23,6 +23,5 @@ API Docs Link: https://documenter.getpostman.com/view/28684250/2s9YsM8WHn
 Collection Link: https://drive.google.com/file/d/1_LCnH_1gZibQS040rOsE0P1sBj9-mMBT/view?usp=sharing
 
 ## Notes
-* .env link (example): https://drive.google.com/file/d/1HLWJ7cRFdSUIZPQRdCtJr_3NkSHTLS1r/view?usp=sharing
-* Main API Server Link: https://circlo-backend2-sxilj6bmva-et.a.run.app
+* Main API Server Link: https://backend-circlo2-sxilj6bmva-et.a.run.app
 * ML Server Link: https://ml-hackfest2-dot-circlo-635bd.et.r.appspot.com
