@@ -79,7 +79,6 @@ router.put('/profile', upload.single('image'), async (req: Request, res: Respons
       }
     })
   } catch (error) {
-    console.log(error)
     next(error)
   }
 })
@@ -143,6 +142,35 @@ router.delete('/profile/address/:addressId', async (req: Request, res: Response,
     res.status(200).json({
       status: 'Success',
       message: 'Success Delete User Address'
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.put('/fcm-token', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const credential: string | undefined = req.headers.authorization
+    if (!credential) throw new AuthenticationError('Authorization Header Required')
+    const { fcmToken } = req.body
+    await handler.updateFcmToken(credential, fcmToken)
+    res.status(200).json({
+      status: 'Success',
+      message: 'Success Update FCM Token'
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.put('/point', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const credential: string | undefined = req.headers.authorization
+    if (!credential) throw new AuthenticationError('Authorization Header Required')
+    await handler.updatePoint(credential, req.body)
+    res.status(200).json({
+      status: 'Success',
+      message: 'Success Update User Point'
     })
   } catch (error) {
     next(error)

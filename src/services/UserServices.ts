@@ -1,13 +1,14 @@
 import db from '../config/DBConfig'
 import { type PostUserType } from '../utils/types/UserTypes'
 import admin from 'firebase-admin'
-import dotenv from 'dotenv'
 import UploadServices from './UploadServices'
 import { nanoid } from 'nanoid'
 import NotFoundError from '../exceptions/NotFoundError'
 import { mapDBToModelUserAddress } from '../utils/mapping/users'
+import config from '../config/EnvConfig'
+
 const uploadServices = new UploadServices()
-dotenv.config({ path: '.env' })
+
 export default class UserServices {
   _pool: any
   _uploadServices: any
@@ -18,12 +19,13 @@ export default class UserServices {
 
   async addUser (data: PostUserType): Promise<string | any> {
     try {
+      const lastname = data.lastname ? data.lastname : null
+
       const query = 'INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)'
-      const values = [data.id, data.firstname, data.lastname, data.username, data.email, data.point, null]
+      const values = [data.id, data.firstname, lastname, data.username, data.email, data.point, null]
 
       await this._pool.execute(query, values)
     } catch (error) {
-      console.error(error)
       throw error
     }
   }
@@ -49,9 +51,17 @@ export default class UserServices {
       }
       return userData
     } catch (error) {
-      console.error(error)
       throw error
     }
+  }
+
+  async getUserIdByEmail (email: string): Promise<any> {
+    const userQuery = 'SELECT USERID FROM user WHERE EMAIL = ?'
+    const values = [email]
+
+    const [queryResult] = await this._pool.execute(userQuery, values)
+    if (queryResult.length === 0) return null
+    return queryResult[0].USERID
   }
 
   async updateUser (id: string, payload: any): Promise<string | any> {
@@ -74,7 +84,7 @@ export default class UserServices {
         const filename = await this._uploadServices.uploadUserImage(payload.image.originalname, payload.image.buffer)
         const encodedFilename = filename.replace(/ /g, '%20')
         await admin.auth().updateUser(id, {
-          photoURL: `${process.env.GS_URL}/${encodedFilename}`
+          photoURL: `${config.GS_URL}/${encodedFilename}`
         })
       }
 
@@ -85,7 +95,18 @@ export default class UserServices {
       const [queryResult] = await this._pool.execute(query, queryValues)
       return queryResult[0]
     } catch (error) {
-      console.error(error)
+      throw error
+    }
+  }
+
+  async updateUserPoint (id: string, point: number): Promise<void> {
+    try {
+      const currentPoint = await this.getUserPoint(id)
+      const newPoint = currentPoint + point
+      const query = 'UPDATE user SET POINT = ? WHERE USERID = ?'
+      const values = [newPoint, id]
+      await this._pool.execute(query, values)
+    } catch (error) {
       throw error
     }
   }
@@ -101,7 +122,6 @@ export default class UserServices {
       const addressId = await this.verifiedAddressExist(id)
       return addressId
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -129,7 +149,6 @@ export default class UserServices {
       const query = `UPDATE address SET ${queryPropertyString} WHERE USERID = ? AND ADDRESSID = ?`
       await this._pool.execute(query, queryValues)
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -156,7 +175,6 @@ export default class UserServices {
         addressId: queryResult[0].ADDRESSID
       }
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -169,7 +187,6 @@ export default class UserServices {
       const formattedQueryResult = queryResult.map(mapDBToModelUserAddress)
       return formattedQueryResult
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -183,10 +200,8 @@ export default class UserServices {
       if (queryResult.length === 0) throw new NotFoundError('User Address Not Found!')
 
       const formattedQueryResult = queryResult.map(mapDBToModelUserAddress)
-      console.log(queryResult)
       return formattedQueryResult
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -197,7 +212,52 @@ export default class UserServices {
       const values = [userId, addressId]
       await this._pool.execute(query, values)
     } catch (error) {
-      console.log(error)
+      throw error
+    }
+  }
+
+  async addFcmToken (idFcmToken: string, id: string, fcmToken: string): Promise<void> {
+    try {
+      const query = 'INSERT INTO fcm_token VALUES (?, ?, ?)'
+      const values = [idFcmToken, id, fcmToken]
+      await this._pool.execute(query, values)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async checkFcmTokenExist (id: string): Promise<boolean> {
+    try {
+      const query = 'SELECT TOKEN FROM fcm_token WHERE USERID = ?'
+      const values = [id]
+      const [queryResult] = await this._pool.execute(query, values)
+      if (queryResult.length === 0) return false
+      return true
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async getFcmToken (id: string, mode?: string): Promise<any> {
+    try {
+      const query = 'SELECT TOKEN FROM fcm_token WHERE USERID = ?'
+      const values = [id]
+      const [queryResult] = await this._pool.execute(query, values)
+      if (queryResult.length === 0 && mode !== 'login') throw new NotFoundError('User FCM Token Not Found!')
+      return queryResult
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async getUserPoint (id: string): Promise<any> {
+    try {
+      const query = 'SELECT POINT FROM user WHERE USERID = ?'
+      const values = [id]
+      const [queryResult] = await this._pool.execute(query, values)
+      const numPoint = Number(queryResult[0].POINT)
+      return numPoint
+    } catch (error) {
       throw error
     }
   }

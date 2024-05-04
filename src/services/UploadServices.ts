@@ -14,7 +14,6 @@ export default class UploadServices {
       await file.save(buffer)
       return file.name
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -25,7 +24,6 @@ export default class UploadServices {
       await file.save(buffer)
       return file.name
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -36,7 +34,6 @@ export default class UploadServices {
       await file.save(buffer)
       return file.name
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -47,7 +44,6 @@ export default class UploadServices {
       await file.save(buffer)
       return { filename: file.name, file }
     } catch (error) {
-      console.log(error)
       throw error
     }
   }

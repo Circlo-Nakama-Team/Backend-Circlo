@@ -1,10 +1,10 @@
 import authorize from '../../services/AuthorizationServices'
 import { nanoid } from 'nanoid'
 import moment from 'moment'
-import dotenv from 'dotenv'
+import config from '../../config/EnvConfig'
+
 import UploadServices from '../../services/UploadServices'
 const uploadServices = new UploadServices()
-dotenv.config({ path: '.env' })
 export default class CommunityHandler {
   _service: any
   _uploadService: any
@@ -20,7 +20,6 @@ export default class CommunityHandler {
       const posts = await this._service.getPosts()
       return posts
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -45,12 +44,11 @@ export default class CommunityHandler {
       if (image !== null) {
         const imageFilename = await this._uploadService.uploadPostImage(image.originalname, image.buffer)
         const encodedFilename = imageFilename.replace(/ /g, '%20')
-        payload.postImage = `${process.env.GS_URL}/${encodedFilename}`
+        payload.postImage = `${config.GS_URL}/${encodedFilename}`
       }
 
       await this._service.addPost(userId, payload)
     } catch (error) {
-      console.log(error)
       throw error
     }
   }

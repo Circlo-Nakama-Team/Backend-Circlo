@@ -15,10 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const AuthorizationServices_1 = __importDefault(require("../../services/AuthorizationServices"));
 const nanoid_1 = require("nanoid");
 const moment_1 = __importDefault(require("moment"));
-const dotenv_1 = __importDefault(require("dotenv"));
+const EnvConfig_1 = __importDefault(require("../../config/EnvConfig"));
 const UploadServices_1 = __importDefault(require("../../services/UploadServices"));
 const uploadServices = new UploadServices_1.default();
-dotenv_1.default.config({ path: '.env' });
 class CommunityHandler {
     constructor(services, validator) {
         this._service = services;
@@ -55,7 +54,7 @@ class CommunityHandler {
                 if (image !== null) {
                     const imageFilename = yield this._uploadService.uploadPostImage(image.originalname, image.buffer);
                     const encodedFilename = imageFilename.replace(/ /g, '%20');
-                    payload.postImage = `${process.env.GS_URL}/${encodedFilename}`;
+                    payload.postImage = `${EnvConfig_1.default.GS_URL}/${encodedFilename}`;
                 }
                 yield this._service.addPost(userId, payload);
             }
@@ -67,11 +66,13 @@ class CommunityHandler {
     }
     addPostLikeHandler(idPost) {
         return __awaiter(this, void 0, void 0, function* () {
+            yield this._service.checkPostExist(idPost);
             yield this._service.addPostLike(idPost);
         });
     }
     decPostLikeHandler(idPost) {
         return __awaiter(this, void 0, void 0, function* () {
+            yield this._service.checkPostExist(idPost);
             yield this._service.decPostLike(idPost);
         });
     }

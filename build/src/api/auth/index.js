@@ -14,28 +14,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const multer_1 = __importDefault(require("multer"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const nanoid_1 = require("nanoid");
 const auth_1 = require("firebase/auth");
+const axios_1 = __importDefault(require("axios"));
 const UserServices_1 = __importDefault(require("../../services/UserServices"));
 const FirebaseAdmin_1 = __importDefault(require("../../config/FirebaseAdmin"));
 const FirebaseConfig_1 = __importDefault(require("../../config/FirebaseConfig"));
 const user_1 = __importDefault(require("../../validator/user"));
 const AuthenticationServices_1 = __importDefault(require("../../services/AuthenticationServices"));
 const AuthenticationError_1 = __importDefault(require("../../exceptions/AuthenticationError"));
-dotenv_1.default.config({ path: '.env' });
+const OauthServices_1 = __importDefault(require("../../services/OauthServices"));
+const EnvConfig_1 = __importDefault(require("../../config/EnvConfig"));
+const params = new URLSearchParams();
 const router = express_1.default.Router();
 const upload = (0, multer_1.default)();
 const userServices = new UserServices_1.default();
+const oauthServices = new OauthServices_1.default();
 const auth = (0, auth_1.getAuth)(FirebaseConfig_1.default);
-const actionCodeSettings = {
-    url: 'http://localhost:5000' // Set the URL where the user will be directed after clicking the email verification link
-    // android: {
-    //   packageName: 'com.nakama.circlo',
-    //   installApp: true,
-    //   minimumVersion: '12'
-    // },
-};
 router.post('/register', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         user_1.default.validateUserRegisterPayload(req.body);
@@ -57,7 +52,7 @@ router.post('/register', (req, res, next) => __awaiter(void 0, void 0, void 0, f
             displayName: username,
             email,
             password,
-            photoURL: `${process.env.GS_URL}/User/profil.jpg`,
+            photoURL: `${EnvConfig_1.default.GS_URL}/User/profil.jpg`,
             disabled: false
         });
         // await admin.auth().createUser({
@@ -92,43 +87,101 @@ router.post('/register', (req, res, next) => __awaiter(void 0, void 0, void 0, f
         next(error);
     }
 }));
-router.post('/register-google', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+// router.post('/register-google', async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     UsersValidator.validateUserRegisterGooglePayload(req.body)
+//     const userData: PostUserType = {
+//       id: req.body.userId,
+//       firstname: req.body.firstname,
+//       lastname: req.body.lastname || null,
+//       username: req.body.username,
+//       email: req.body.email,
+//       point: 0
+//     }
+//     await userServices.addUser(userData)
+//     res.status(201).send({
+//       status: 'Success',
+//       message: 'Success Add User',
+//       data: {
+//         userId: req.body.userId
+//       }
+//     })
+//   } catch (error) {
+//     console.log(error)
+//     next(error)
+//   }
+// })
+router.get('/oauth', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        user_1.default.validateUserRegisterGooglePayload(req.body);
-        const userData = {
-            id: req.body.userId,
-            firstname: req.body.firstname,
-            lastname: req.body.lastname || null,
-            username: req.body.username,
-            email: req.body.email,
-            point: 0
-        };
-        yield userServices.addUser(userData);
-        res.status(201).send({
-            status: 'Success',
-            message: 'Success Add User',
-            data: {
-                userId: req.body.userId
-            }
-        });
+        const authUrl = yield oauthServices.getAuthUrl();
+        res.redirect(authUrl);
     }
     catch (error) {
         console.log(error);
         next(error);
     }
 }));
+// router.get('/google/callback', async (req: Request, res: Response, next: NextFunction) => {
+//   const { code } = req.query
+//   console.log(code)
+//   const oAuth2Client = oauthServices._client
+//   const { tokens } = await oAuth2Client.getToken(code)
+//   oAuth2Client.setCredentials(tokens)
+//   // const userData = await oauthServices.getUserData(oAuth2Client)
+//   const redirectUri = `circloapp://auth/callback?credential=${tokens.id_token}&refreshToken=${tokens.refresh_token}`
+//   // const redirectUri = `https://23ee-103-3-222-110.ngrok-free.app/?credential=${tokens.id_token}&refreshToken=${tokens.refresh_token}`
+//   res.redirect(redirectUri)
+//   // res.status(200).send({
+//   //   status: 'success',
+//   //   message: 'Masuk Berhasil',
+//   //   data: {
+//   //     token: {
+//   //       credential: tokens.id_token,
+//   //       accessToken: tokens.access_token,
+//   //       refreshToken: tokens.refresh_token
+//   //     },
+//   //     userData: {
+//   //       name: userData.given_name,
+//   //       email: userData.email,
+//   //       image: userData.picture
+//   //     }
+//   //   }
+//   // })
+// })
+router.get('/google/callback', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { code } = req.query;
+    // const redirectUri = `https://23ee-103-3-222-110.ngrok-free.app/?credential=${code}`
+    const redirectUri = `circloapp://auth/callback?code=${code}`;
+    res.redirect(redirectUri);
+}));
+router.get('/oauth/token', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const { authCode } = req.query;
+    const oAuth2Client = oauthServices._client;
+    const { tokens } = yield oAuth2Client.getToken(authCode);
+    oAuth2Client.setCredentials(tokens);
+    res.status(200).send({
+        status: 'success',
+        message: 'Get Token Success',
+        data: {
+            credential: tokens.id_token,
+            refresh_token: tokens.refresh_token
+        }
+    });
+}));
 router.post('/login', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         user_1.default.validateUserLoginPayload(req.body);
         const user = {
             email: req.body.email,
-            password: req.body.password
+            password: req.body.password,
+            fcmToken: req.body.fcmToken
         };
         // const isEmailVerified = await admin.auth().getUserByEmail(user.email)
         // console.log(isEmailVerified)
         const signInResponse = yield (0, auth_1.signInWithEmailAndPassword)(auth, user.email, user.password);
         const credential = yield signInResponse.user.getIdToken(true);
         const refreshToken = signInResponse.user.refreshToken;
+        // await userServices.updateFcmToken(user.fcmToken, user.email)
         res.status(200).send({
             status: 'success',
             message: 'Masuk Berhasil',
@@ -157,6 +210,22 @@ router.post('/logout', (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         catch (error) {
             next(error);
         }
+    }
+    catch (error) {
+        next(error);
+    }
+}));
+router.post('/refresh-token', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { refreshToken } = req.body;
+        params.append('grant_type', 'refresh_token');
+        params.append('refresh_token', refreshToken);
+        const refreshingToken = yield axios_1.default.post(`https://securetoken.googleapis.com/v1/token?key=${EnvConfig_1.default.API_KEY}`, params, {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        });
+        res.status(201).json({ status: 'Success', message: 'Refreshing Access Token Success', credential: refreshingToken.data.access_token });
     }
     catch (error) {
         next(error);

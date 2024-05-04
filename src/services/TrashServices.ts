@@ -1,12 +1,14 @@
 import db from '../config/DBConfig'
-import dotenv from 'dotenv'
 import { mapDBModelTrashCategories } from '../utils/mapping/trash'
 import NotFoundError from '../exceptions/NotFoundError'
-dotenv.config({ path: '.env' })
-export default class DonateServices {
+import { GoogleGenerativeAI } from '@google/generative-ai'
+import config from '../config/EnvConfig'
+export default class TrashServices {
   _pool: any
+  _AIClient: any
   constructor () {
     this._pool = db
+    this._AIClient = new GoogleGenerativeAI(config.AI_KEY ? config.AI_KEY : '')
   }
 
   async getTrashList (): Promise<any> {
@@ -16,7 +18,6 @@ export default class DonateServices {
       const [result] = await this._pool.execute(query)
       return result
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -28,7 +29,6 @@ export default class DonateServices {
       const formattedResult = await result.map(mapDBModelTrashCategories)
       return formattedResult
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -42,7 +42,6 @@ export default class DonateServices {
       const [result] = await this._pool.execute(query, values)
       return result[0]
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -68,7 +67,44 @@ export default class DonateServices {
       }
       return result
     } catch (error) {
-      console.log(error)
+      throw error
+    }
+  }
+
+  async getTrashExplorer (): Promise<any> {
+    try {
+      const query = 'SELECT IDEASID AS ideasId, IDEAS_NAME AS ideasName, IMAGE AS ideasImage, DESCRIPTION AS ideasDescription, PRICE AS potensial_price FROM ideas'
+      const [result] = await this._pool.execute(query)
+
+      if (result.length !== 0) {
+        const queryLink = 'SELECT TITLE AS title, LINK AS tutorialLink, SOURCE AS linkSource, CREATOR AS creator FROM tutorial WHERE IDEASID = ?'
+        const queryBenefits = 'SELECT DESCRIPTION AS description FROM ideas_benefit WHERE IDEASID = ?'
+        await Promise.all(result.map(async (trash: any): Promise<any> => {
+          const linkAndBenefitsValues = [trash.ideasId]
+          const [linkResult] = await this._pool.execute(queryLink, linkAndBenefitsValues)
+          const [benefitsResult] = await this._pool.execute(queryBenefits, linkAndBenefitsValues)
+          const formattedBenefitList = await benefitsResult.map((benefit: any) => benefit.description)
+          trash.link = linkResult
+          trash.benefits = formattedBenefitList
+        }))
+      }
+      return result
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async getTrashQuestions (): Promise<any> {
+    try {
+      const model = this._AIClient.getGenerativeModel({ model: 'gemini-pro' })
+      const prompt = `Can you provide 3 Questions about trash with 4 possible answers, provide the correct answer and give the explanation?.
+      provide my request with json format.`
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const text = response.text()
+      return text
+    } catch (error) {
       throw error
     }
   }

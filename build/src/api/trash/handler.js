@@ -15,11 +15,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const stream_1 = require("stream");
 const form_data_1 = __importDefault(require("form-data"));
+const EnvConfig_1 = __importDefault(require("../../config/EnvConfig"));
 const AuthorizationServices_1 = __importDefault(require("../../services/AuthorizationServices"));
+const trash_1 = __importDefault(require("../../validator/trash"));
 class TrashHandler {
     constructor(services, uploadServices) {
         this._service = services;
         this._uploadServices = uploadServices;
+        this._validator = trash_1.default;
     }
     getTrashes() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -49,7 +52,8 @@ class TrashHandler {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield (0, AuthorizationServices_1.default)(credential);
-                const { originalname, buffer } = image;
+                const { originalname, buffer, mimetype } = image;
+                yield this._validator.validateImagePredictPayload({ image: mimetype });
                 const { filename, file: filePredict } = yield this._uploadServices.uploadPredictImage(originalname, buffer);
                 const signedUrl = yield filePredict.getSignedUrl({
                     action: 'read',
@@ -65,7 +69,7 @@ class TrashHandler {
                 stream.push(null);
                 formData.append('file', stream, { filename });
                 // Make the HTTP request using axios and the FormData object
-                const predictionResponse = yield axios_1.default.post(`${process.env.ML_SERVER}/predict/image`, formData, {
+                const predictionResponse = yield axios_1.default.post(`${EnvConfig_1.default.ML_SERVER}/predict/image`, formData, {
                     headers: Object.assign({}, formData.getHeaders()),
                     responseType: 'json'
                 });

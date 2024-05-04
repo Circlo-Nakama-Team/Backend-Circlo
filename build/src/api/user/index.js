@@ -126,6 +126,22 @@ router.get('/profile/address/:id', (req, res, next) => __awaiter(void 0, void 0,
         next(error);
     }
 }));
+router.put('/profile/address/:id', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { id: addressId } = req.params;
+        const credential = req.headers.authorization;
+        if (!credential)
+            throw new AuthenticationError_1.default('Authorization Header Required');
+        yield handler.putAddressHandler(credential, addressId, req.body);
+        res.status(200).json({
+            status: 'Success',
+            message: 'Success Update User Address'
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+}));
 router.delete('/profile/address/:addressId', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const credential = req.headers.authorization;
@@ -136,6 +152,22 @@ router.delete('/profile/address/:addressId', (req, res, next) => __awaiter(void 
         res.status(200).json({
             status: 'Success',
             message: 'Success Delete User Address'
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+}));
+router.post('/fcm-token', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const credential = req.headers.authorization;
+        if (!credential)
+            throw new AuthenticationError_1.default('Authorization Header Required');
+        const { fcmToken } = req.body;
+        yield handler.updateFcmToken(credential, fcmToken);
+        res.status(200).json({
+            status: 'Success',
+            message: 'Success Update FCM Token'
         });
     }
     catch (error) {

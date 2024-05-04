@@ -1,4 +1,4 @@
-import type { MapDBModelUserPostType } from '../../types/CommunityTypes'
+import type { MapDBModelUserPostType, MapDBModelUserGetPostType } from '../../types/CommunityTypes'
 const mapDBToModel = ({
   POST_ID,
   USERID,
@@ -18,13 +18,17 @@ const mapDBToModel = ({
 const mapDBToModelGetPosts = ({
   POST_ID,
   USERID,
+  USERNAME,
   POST_BODY,
   POST_TIME,
   POST_LIKES,
   POST_IMAGE
-}: MapDBModelUserPostType): any => ({
+}: MapDBModelUserGetPostType): any => ({
   id: POST_ID,
-  userId: USERID,
+  user: {
+    userId: USERID,
+    username: USERNAME
+  },
   postBody: POST_BODY,
   postTime: POST_TIME,
   postLikes: POST_LIKES,

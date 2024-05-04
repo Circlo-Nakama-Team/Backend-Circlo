@@ -5,13 +5,16 @@ import multer from 'multer'
 import DonateHandler from './handler'
 import DonateServices from '../../services/DonateServices'
 import DonateValidator from '../../validator/donate'
+import UserServices from '../../services/UserServices'
 
 import AuthorizationError from '../../exceptions/AuthorizationError'
+import { getMessaging } from 'firebase-admin/messaging'
 
 dotenv.config({ path: '.env' })
 const upload = multer()
 const router = express.Router()
 const donateServices = new DonateServices()
+const userServices = new UserServices()
 const handler = new DonateHandler(donateServices, DonateValidator)
 
 router.post('/', upload.array('image', 3), async (req: Request, res: Response, next: NextFunction): Promise<any> => {
@@ -75,6 +78,31 @@ router.get('/schedule/time', async (req: Request, res: Response, next: NextFunct
       data: {
         donateSchedule
       }
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+router.put('/:id/status', async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  try {
+    const { id } = req.params
+    await handler.updateDonateStatusHandler(id, req.body.status)
+    const userId = await donateServices.getUserIdByDonateId(id)
+    const userFcmTokens = await userServices.getFcmToken(userId)
+    userFcmTokens.map(async (token: any) => {
+      const message = {
+        token: token.TOKEN,
+        notification: {
+          title: 'Notif',
+          body: 'This is a Test Notification'
+        }
+      }
+      await getMessaging().send(message)
+    })
+    res.status(200).json({
+      status: 'Success',
+      message: 'Success Update Status User Donate'
     })
   } catch (error) {
     next(error)

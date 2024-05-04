@@ -1,12 +1,11 @@
 import { Storage } from '@google-cloud/storage'
 import path from 'path'
-import dotenv from 'dotenv'
-dotenv.config({ path: '.env' })
+import config from './EnvConfig'
 const serviceKey = path.join(__dirname, '../../credentials.json')
 
 const storage = new Storage({
   keyFilename: serviceKey,
-  projectId: process.env.PROJECT_ID
+  projectId: config.PROJECT_ID
 })
 
 export default storage

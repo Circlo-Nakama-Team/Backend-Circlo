@@ -13,12 +13,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const DBConfig_1 = __importDefault(require("../config/DBConfig"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const nanoid_1 = require("nanoid");
 const moment_1 = __importDefault(require("moment"));
 const donate_1 = require("../utils/mapping/donate");
 const NotFoundError_1 = __importDefault(require("../exceptions/NotFoundError"));
-dotenv_1.default.config({ path: '.env' });
 class DonateServices {
     constructor() {
         this._pool = DBConfig_1.default;

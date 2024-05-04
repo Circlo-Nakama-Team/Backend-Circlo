@@ -1,6 +1,8 @@
 import express, { type Express, type Request, type Response, type NextFunction } from 'express'
-import dotenv from 'dotenv'
+import config from './config/EnvConfig'
+
 import path from 'path'
+import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import UserAPI from './api/user'
 import AuthAPI from './api/auth'
@@ -11,12 +13,28 @@ import bodyParser from 'body-parser'
 import ClientError from './exceptions/ClientError'
 import favicon from 'express-favicon'
 
-dotenv.config({ path: '.env' })
 const app: Express = express()
-const port = 8080
+const port = config.PORT
+// const sessionStore: any = new MySQLStore(dbConfig)
+
+app.use(bodyParser.json())
+app.use(cookieParser())
 
 app.use(cors())
-app.use(bodyParser.json())
+
+// app.use(session({
+//   store: sessionStore,
+//   secret: 'session_cookie_secret',
+//   resave: false,
+//   saveUninitialized: false,
+//   cookie: {
+//     httpOnly: false,
+//     // secure: true,
+//     maxAge: 1000 * 60 * 60 * 24,
+//     signed: false, // Set to false to use the plain session ID
+//     // sameSite: 'none',
+//   },
+// }));
 
 const errorHandlingMiddleware = (err: Error, req: Request, res: Response, next: NextFunction): any => {
   if (err instanceof ClientError) {
@@ -53,5 +71,5 @@ app.use('/trash', TrashAPI)
 
 app.use(errorHandlingMiddleware)
 app.listen(port, () => {
-  console.log(`[server]: Server is running at port: ${port}`)
+  console.log(`[server]: Server is running at port ${port}`)
 })

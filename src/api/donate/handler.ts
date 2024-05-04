@@ -1,9 +1,10 @@
 import authorize from '../../services/AuthorizationServices'
-import dotenv from 'dotenv'
 import UploadServices from '../../services/UploadServices'
 import { nanoid } from 'nanoid'
+import config from '../../config/EnvConfig'
+
 const uploadServices = new UploadServices()
-dotenv.config({ path: '.env' })
+
 export default class DonateHandler {
   _service: any
   _uploadService: any
@@ -31,14 +32,12 @@ export default class DonateHandler {
         const file = await this._uploadService.uploadDonateImage(filename, image.buffer)
         const encodedFilename = file.replace(/ /g, '%20')
 
-        const link = `${process.env.GS_URL}/${encodedFilename}`
-        console.log(link)
+        const link = `${config.GS_URL}/${encodedFilename}`
         this._service.addDonateImage(donateId, imageId, link)
         return
       }))
       return donateId
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -55,7 +54,6 @@ export default class DonateHandler {
       }))
       return fixedDonateData
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -72,7 +70,6 @@ export default class DonateHandler {
       }
       return fixedDonateData
     } catch (error) {
-      console.log(error)
       throw error
     }
   }
@@ -82,7 +79,14 @@ export default class DonateHandler {
       const donateData = await this._service.getDonateSchedule()
       return donateData
     } catch (error) {
-      console.log(error)
+      throw error
+    }
+  }
+
+  async updateDonateStatusHandler (id: string, status: string): Promise<void> {
+    try {
+      await this._service.updateDonateStatus(id, status)
+    } catch (error) {
       throw error
     }
   }

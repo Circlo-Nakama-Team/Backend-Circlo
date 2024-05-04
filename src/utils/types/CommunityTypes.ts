@@ -14,3 +14,12 @@ export interface MapDBModelUserPostType {
   POST_LIKES: number
   POST_IMAGE: string
 }
+export interface MapDBModelUserGetPostType {
+  POST_ID: string
+  USERID: string
+  USERNAME: string
+  POST_BODY: string
+  POST_TIME: string
+  POST_LIKES: number
+  POST_IMAGE: string
+}

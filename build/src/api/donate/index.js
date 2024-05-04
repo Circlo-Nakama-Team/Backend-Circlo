@@ -19,6 +19,7 @@ const handler_1 = __importDefault(require("./handler"));
 const DonateServices_1 = __importDefault(require("../../services/DonateServices"));
 const donate_1 = __importDefault(require("../../validator/donate"));
 const AuthorizationError_1 = __importDefault(require("../../exceptions/AuthorizationError"));
+const messaging_1 = require("firebase-admin/messaging");
 dotenv_1.default.config({ path: '.env' });
 const upload = (0, multer_1.default)();
 const router = express_1.default.Router();
@@ -95,5 +96,28 @@ router.get('/schedule/time', (req, res, next) => __awaiter(void 0, void 0, void 
     catch (error) {
         next(error);
     }
+}));
+router.post('/send', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log('hcalll');
+    const message = {
+        token: 'fQeeM5awProE2UuPgmlLBr:APA91bE6DjZO3NC2g3MPdbGpTHVtn80p1gkU6IbTkuFt1ufcJoz1hUq3ErdIG7Yy_C9u-4FwJ3mgJB3OIyd9GkZlTH8ak8X1R693PA8tk9v8z0_HuiD2HiA2SaKxUgSy6NNxZRj_4hRX',
+        notification: {
+            title: 'Notif',
+            body: 'This is a Test Notification'
+        },
+    };
+    (0, messaging_1.getMessaging)()
+        .send(message)
+        .then((response) => {
+        res.status(200).json({
+            message: 'Successfully sent message'
+        });
+        console.log('Successfully sent message:', response);
+    })
+        .catch((error) => {
+        res.status(400);
+        res.send(error);
+        console.log('Error sending message:', error);
+    });
 }));
 exports.default = router;
