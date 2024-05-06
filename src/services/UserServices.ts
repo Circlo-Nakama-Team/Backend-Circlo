@@ -60,6 +60,7 @@ export default class UserServices {
     const values = [email]
 
     const [queryResult] = await this._pool.execute(userQuery, values)
+    console.log(queryResult)
     if (queryResult.length === 0) return null
     return queryResult[0].USERID
   }

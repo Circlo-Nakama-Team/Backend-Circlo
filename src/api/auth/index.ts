@@ -67,11 +67,13 @@ router.post('/register', async (req: Request, res: Response, next: NextFunction)
 
 router.post('/register-google', async (req: Request, res: Response, next: NextFunction) => {
   try {
+    console.log('babii')
     const isUserExist = await userServices.getUserIdByEmail(req.body.email)
     UsersValidator.validateUserRegisterGooglePayload(req.body)
     const { uid } = await admin.auth().getUserByEmail(req.body.email)
     const idFcmToken = `fcm-${nanoid(10)}`
     if (isUserExist) {
+      console.log('heiii')
       const userFcmTokens = await userServices.getFcmToken(uid)
       const isUserFcmTokenExist = userFcmTokens.some((token: any) => token.TOKEN === req.body.fcmToken)
 
@@ -81,7 +83,7 @@ router.post('/register-google', async (req: Request, res: Response, next: NextFu
 
       throw new ClientError('User Already Exist')
     }
-    await userServices.addFcmToken(idFcmToken, uid, req.body.fcmToken)
+    console.log('haloo')
     const userData: PostUserType = {
       id: uid,
       firstname: req.body.firstname,
@@ -91,6 +93,7 @@ router.post('/register-google', async (req: Request, res: Response, next: NextFu
       point: 0
     }
     await userServices.addUser(userData)
+    await userServices.addFcmToken(idFcmToken, uid, req.body.fcmToken)
 
     res.status(201).send({
       status: 'Success',
