@@ -1,13 +1,8 @@
 # Circlo Backend
 ---------------------
-## UPDATED 
-1. Get articles with web scraping
-2. Generate quiz using Gemini AI
-3. Add Oauth2 for authentication
-4. Push Notification when donate status change
-5. Send email verification and reset password
 ## Overview
 The Backend-Circlo repository focuses on creating a REST API that will be used by applications. The Circlo application REST API is created using the Typescript programming language with ExpressJs as the framework, MySQL as the database, and Firebase for authentication.
+
 ## How To Run The Code
 1. Set up the firebase project
 2. Setup Web App in firebase
@@ -23,10 +18,17 @@ The Backend-Circlo repository focuses on creating a REST API that will be used b
 12. Deploy ML from ML repo
 13. Install dependencies
 14. Run the program with the command 'npm run start-dev' in the terminal
-
+   
 ## Documentation
 API Docs Link: https://documenter.getpostman.com/view/28684250/2s9YsM8WHn
 Collection Link: https://drive.google.com/file/d/1_LCnH_1gZibQS040rOsE0P1sBj9-mMBT/view?usp=sharing
+
+## Updated
+1. Get articles with web scraping
+2. Generate quiz using Gemini AI
+3. Add Oauth2 for authentication
+4. Push Notification when donate status change
+5. Send email verification and reset password
 
 ## Notes
 * Main API Server Link: https://backend-circlo2-sxilj6bmva-et.a.run.app
