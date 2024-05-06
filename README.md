@@ -23,7 +23,7 @@ The Backend-Circlo repository focuses on creating a REST API that will be used b
 API Docs Link: https://documenter.getpostman.com/view/28684250/2s9YsM8WHn
 Collection Link: https://drive.google.com/file/d/1_LCnH_1gZibQS040rOsE0P1sBj9-mMBT/view?usp=sharing
 
-## Updated
+## Updated [Top 100 GSC Resubmission]
 1. Get articles with web scraping
 2. Generate quiz using Gemini AI
 3. Add Oauth2 for authentication
